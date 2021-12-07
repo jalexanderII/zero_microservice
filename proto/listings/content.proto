@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package listings;
+option go_package = "./proto;listings";
+
+import "common.proto";
+
+message Content {
+  enum Type {
+    TYPE_UNKNOWN = 0;
+    IMAGE = 1;
+    VIDEO = 2;
+  }
+
+  string id = 1;
+  string filename = 2;
+  bytes file_id = 3;
+  oneof source {
+    string apartment_ref = 4;
+    string building_ref = 5;
+  }
+  Type type = 6;
+}
+
+message ContentDataBlock {
+  string filename = 1;
+}
+
+message GetContentRequest {
+  string id = 1;
+  string filename = 2;
+  bytes file_id = 3;
+}
+
+message DeletePhotoRequest {
+  string id = 1;
+  string filename = 2;
+  bytes file_id = 3;
+}
+
+message DeletePhotoResponse {
+  STATUS status = 1;
+}

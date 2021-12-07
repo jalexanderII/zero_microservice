@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package listings;
+option go_package = "./proto;listings";
+
+import "google/protobuf/field_mask.proto";
+import "common.proto";
+
+message Realtor {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string phone_number = 4;
+  string company = 5;
+}
+
+// Service Methods
+message CreateRealtorRequest {
+  Realtor realtor = 1;
+}
+
+message GetRealtorRequest {
+  string id = 1;
+}
+
+message UpdateRealtorRequest {
+  string id = 1;
+  Realtor realtor = 2;
+  google.protobuf.FieldMask mask = 3;
+}
+
+message DeleteRealtorRequest {
+  string id = 1;
+}
+
+message ListRealtorRequest {}
+
+message ListRealtorResponse {
+  repeated Realtor realtors = 1;
+}
+
+message DeleteRealtorResponse {
+  STATUS status = 1;
+  Realtor realtor = 2;
+}

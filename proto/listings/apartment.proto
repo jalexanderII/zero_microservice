@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package listings;
+option go_package = "./proto;listings";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+import "building.proto";
+import "realtor.proto";
+import "common.proto";
+import "content.proto";
+
+message Apartment {
+  string id = 1;
+  string name = 2;
+  Place address = 3;
+  int32 rent = 4;
+  int32 sqft = 5;
+  int32 beds = 6;
+  int32 baths = 7;
+  ListingMetrics listing_metrics = 8;
+  string description = 9;
+  repeated string amenities = 10;
+  repeated Content uploads = 11;
+  string building_ref = 12;
+  Building building = 13;
+  string realtor_ref = 14;
+  Realtor realtor = 15;
+  bool is_archived = 16;
+}
+
+message ListingMetrics  {
+  google.protobuf.Timestamp available_on = 1;
+  int32 days_on_market = 2;
+}
+
+// Service Methods
+message CreateApartmentRequest {
+  Apartment apartment = 1;
+}
+
+message GetApartmentRequest {
+  string id = 1;
+}
+
+message UpdateApartmentRequest {
+  string id = 1;
+  Apartment apartment = 2;
+  google.protobuf.FieldMask mask = 3;
+}
+
+message DeleteApartmentRequest {
+  string id = 1;
+}
+
+message ListApartmentRequest {}
+
+message ListApartmentResponse {
+  repeated Apartment apartments = 1;
+}
+
+message DeleteApartmentResponse {
+  STATUS status = 1;
+  Apartment apartment = 2;
+}

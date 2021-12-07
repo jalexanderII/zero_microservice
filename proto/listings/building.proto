@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package listings;
+option go_package = "./proto;listings";
+
+import "google/protobuf/field_mask.proto";
+import "realtor.proto";
+import "common.proto";
+import "content.proto";
+
+message Building {
+  string id = 1;
+  string name = 2;
+  Place address = 3;
+  string description = 9;
+  repeated string amenities = 10;
+  repeated Content uploads = 11;
+  string realtor_ref = 13;
+  Realtor realtor = 14;
+}
+
+// Service Methods
+message CreateBuildingRequest {
+  Building building = 1;
+}
+
+message GetBuildingRequest {
+  string id = 1;
+}
+
+message UpdateBuildingRequest {
+  string id = 1;
+  Building building = 2;
+  google.protobuf.FieldMask mask = 3;
+}
+
+message DeleteBuildingRequest {
+  string id = 1;
+}
+
+message ListBuildingRequest {}
+
+message ListBuildingResponse {
+  repeated Building buildings = 1;
+}
+
+message DeleteBuildingResponse {
+  STATUS status = 1;
+  Building building = 2;
+}

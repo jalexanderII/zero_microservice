@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package listings;
+option go_package = "./proto;listings";
+
+import "apartment.proto";
+import "building.proto";
+import "realtor.proto";
+import "content.proto";
+import "google/protobuf/empty.proto";
+
+service Listings {
+  // CRUD apartment functions
+  rpc CreateApartment(CreateApartmentRequest) returns (Apartment);
+  rpc GetApartment(GetApartmentRequest) returns (Apartment);
+  rpc ListApartments(ListApartmentRequest) returns (ListApartmentResponse);
+  rpc UpdateApartment(UpdateApartmentRequest) returns (Apartment);
+  rpc DeleteApartment(DeleteApartmentRequest) returns (DeleteApartmentResponse);
+  // CRUD building functions
+  rpc CreateBuilding(CreateBuildingRequest) returns (Building);
+  rpc GetBuilding(GetBuildingRequest) returns (Building);
+  rpc ListBuildings(ListBuildingRequest) returns (ListBuildingResponse);
+  rpc UpdateBuilding(UpdateBuildingRequest) returns (Building);
+  rpc DeleteBuilding(DeleteBuildingRequest) returns (DeleteBuildingResponse);
+  // CRUD realtor functions
+  rpc CreateRealtor(CreateRealtorRequest) returns (Realtor);
+  rpc GetRealtor(GetRealtorRequest) returns (Realtor);
+  rpc ListRealtors(ListRealtorRequest) returns (ListRealtorResponse);
+  rpc UpdateRealtor(UpdateRealtorRequest) returns (Realtor);
+  rpc DeleteRealtor(DeleteRealtorRequest) returns (DeleteRealtorResponse);
+  // Upload and Delete images or videos from/to blob store
+  rpc UploadPhoto (stream ContentDataBlock) returns (google.protobuf.Empty);
+  rpc StreamPhotos (stream GetContentRequest) returns (stream Content);
+  rpc DeletePhoto (DeletePhotoRequest) returns (DeletePhotoResponse);
+}
+
