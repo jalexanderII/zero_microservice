@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.15.1
+	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.4
 	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1

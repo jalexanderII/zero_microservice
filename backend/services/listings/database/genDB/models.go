@@ -11,8 +11,9 @@ import (
 type ContentSource string
 
 const (
-	ContentSourceAPARTMENT ContentSource = "APARTMENT"
-	ContentSourceBUILDING  ContentSource = "BUILDING"
+	ContentSourceSOURCEUNKNOWN ContentSource = "SOURCE_UNKNOWN"
+	ContentSourceAPARTMENT     ContentSource = "APARTMENT"
+	ContentSourceBUILDING      ContentSource = "BUILDING"
 )
 
 func (e *ContentSource) Scan(src interface{}) error {
@@ -92,7 +93,6 @@ type Building struct {
 
 type Content struct {
 	ContentID     int32          `json:"content_id"`
-	FileID        int32          `json:"file_id"`
 	Filename      sql.NullString `json:"filename"`
 	ContentType   ContentType    `json:"content_type"`
 	ContentSource ContentSource  `json:"content_source"`

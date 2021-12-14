@@ -3,46 +3,37 @@ syntax = "proto3";
 package listings;
 option go_package = "./proto;listings";
 
-message Content {
-  enum Type {
-    TYPE_UNKNOWN = 0;
-    IMAGE = 1;
-    VIDEO = 2;
-  }
-
-  int32 id = 1;
-  string filename = 2;
-  int32 file_id = 3;
-  oneof source {
-    int32 apartment_ref = 4;
-    int32 building_ref = 5;
-  }
-  Type type = 6;
-}
-
 enum STATUS {
   STATUS_UNKNOWN = 0;
   SUCCESS = 1;
   FAIL = 2;
 }
 
-message ContentDataBlock {
-  string filename = 1;
+message UploadContentRequest {
+  oneof data {
+    ContentInfo info = 1;
+    bytes chunk_data = 2;
+  };
 }
 
-message GetContentRequest {
-  int32 id = 1;
-  string filename = 2;
-  int32 file_id = 3;
+message ContentInfo {
+  enum ContentType {
+    TYPE_UNKNOWN = 0;
+    IMAGE = 1;
+    VIDEO = 2;
+  }
+  enum ContentSource {
+    SOURCE_UNKNOWN = 0;
+    APARTMENT = 1;
+    BUILDING = 2;
+  }
+
+  int32 source_id = 1;
+  ContentType content_type = 2;
+  ContentSource content_source = 3;
 }
 
-message DeletePhotoRequest {
-  int32 id = 1;
-  string filename = 2;
-  int32 file_id = 3;
+message UploadContentResponse {
+  int32 content_id = 1;
+  uint32 size = 2;
 }
-
-message DeletePhotoResponse {
-  STATUS status = 1;
-}
-

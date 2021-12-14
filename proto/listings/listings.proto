@@ -7,7 +7,6 @@ import "apartment.proto";
 import "building.proto";
 import "realtor.proto";
 import "content.proto";
-import "google/protobuf/empty.proto";
 
 service Listings {
   // CRUD apartment functions
@@ -29,8 +28,6 @@ service Listings {
   rpc UpdateRealtor(UpdateRealtorRequest) returns (Realtor);
   rpc DeleteRealtor(DeleteRealtorRequest) returns (DeleteRealtorResponse);
   // Upload and Delete images or videos from/to blob store
-  rpc UploadPhoto (stream ContentDataBlock) returns (google.protobuf.Empty);
-  rpc StreamPhotos (stream GetContentRequest) returns (stream Content);
-  rpc DeletePhoto (DeletePhotoRequest) returns (DeletePhotoResponse);
+  rpc UploadContent(stream UploadContentRequest) returns (UploadContentResponse);
 }
 

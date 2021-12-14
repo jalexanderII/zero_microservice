@@ -186,3 +186,26 @@ WHERE realtor_id = $1;
 DELETE
 FROM realtors
 WHERE realtor_id = $1;
+
+-- name: UploadContent :one
+INSERT INTO content (content_id,
+                     filename,
+                     content_type,
+                     content_source,
+                     source_id)
+VALUES ($1,
+        $2,
+        $3,
+        $4,
+        $5)
+RETURNING *;
+
+-- name: AppendContentApartment :exec
+UPDATE apartments
+SET upload_ids = array_append(upload_ids, $2)
+WHERE apartment_id = $1;
+
+-- name: AppendContentBuilding :exec
+UPDATE buildings
+SET upload_ids = array_append(upload_ids, $2)
+WHERE building_id = $1;

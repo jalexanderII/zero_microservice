@@ -5,6 +5,7 @@ CREATE TYPE content_type AS ENUM (
     );
 
 CREATE TYPE content_source AS ENUM (
+    'SOURCE_UNKNOWN',
     'APARTMENT',
     'BUILDING'
     );
@@ -12,7 +13,6 @@ CREATE TYPE content_source AS ENUM (
 CREATE TABLE IF NOT EXISTS content
 (
     content_id     SERIAL PRIMARY KEY,
-    file_id        integer NOT NULL,
     filename       text,
     content_type   content_type,
     content_source content_source,

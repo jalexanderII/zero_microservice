@@ -1,21 +1,31 @@
 package server
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"io"
+	"log"
 
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
+	contentStore "github.com/jalexanderII/zero_microservice/backend/services/listings/store"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+const maxImageSize = 1 << 20
+
 type listingsServer struct {
-	DB *listingsDB.ListingsDB
+	listingsPB.UnimplementedListingsServer
+	DB           *listingsDB.ListingsDB
+	ContentStore contentStore.ContentStore
 }
 
-func NewListingsServer(db *listingsDB.ListingsDB) *listingsServer {
-	return &listingsServer{db}
+func NewListingsServer(db *listingsDB.ListingsDB, cs contentStore.ContentStore) *listingsServer {
+	return &listingsServer{DB: db, ContentStore: cs}
 }
 
 func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.CreateApartmentRequest) (*listingsPB.Apartment, error) {
@@ -261,16 +271,122 @@ func (s listingsServer) DeleteRealtor(ctx context.Context, in *listingsPB.Delete
 	return &listingsPB.DeleteRealtorResponse{Status: listingsPB.STATUS_SUCCESS, Realtor: RealtorDBtoPB(realtor)}, nil
 }
 
-func (s listingsServer) UploadPhoto(in listingsPB.Listings_UploadPhotoServer) error {
-	return nil
-}
+// UploadContent is a streaming RPC to upload content
+func (s listingsServer) UploadContent(stream listingsPB.Listings_UploadContentServer) error {
+	req, err := stream.Recv()
+	if err != nil {
+		return status.Errorf(codes.Unknown, "cannot receive image info")
+	}
 
-func (s listingsServer) StreamPhotos(in listingsPB.Listings_StreamPhotosServer) error {
-	return nil
-}
+	contentType := req.GetInfo().GetContentType()
+	sourceID := req.GetInfo().GetSourceId()
+	sourceType := req.GetInfo().GetContentSource()
+	log.Printf("receive an upload request for content %v with type %v", sourceID, contentType)
 
-func (s listingsServer) DeletePhoto(ctx context.Context, in *listingsPB.DeletePhotoRequest) (*listingsPB.DeletePhotoResponse, error) {
-	return nil, nil
+	switch sourceType {
+	case listingsPB.ContentInfo_APARTMENT:
+		apartment, err := s.DB.GetApartment(stream.Context(), sourceID)
+		if err != nil {
+			return status.Errorf(codes.Internal, "cannot find apartment: %v", err)
+		}
+		if apartment.Name == "" {
+			return status.Errorf(codes.InvalidArgument, "apartment id %v doesn't exist", sourceID)
+		}
+	case listingsPB.ContentInfo_BUILDING:
+		building, err := s.DB.GetBuilding(stream.Context(), sourceID)
+		if err != nil {
+			return status.Errorf(codes.Internal, "cannot find building: %v", err)
+		}
+		if building.Name == "" {
+			return status.Errorf(codes.InvalidArgument, "building id %v doesn't exist", sourceID)
+		}
+	default:
+		return status.Errorf(codes.Internal, "incorrect source type or other error: %v", sourceType)
+	}
+
+	contentData := bytes.Buffer{}
+	contentSize := 0
+
+	for {
+		err := contextError(stream.Context())
+		if err != nil {
+			return err
+		}
+
+		log.Print("waiting to receive more data")
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			log.Print("no more data")
+			break
+		}
+		if err != nil {
+			return status.Errorf(codes.Unknown, "cannot receive chunk data: %v", err)
+		}
+
+		chunk := req.GetChunkData()
+		size := len(chunk)
+
+		log.Printf("received a chunk with size: %d", size)
+
+		contentSize += size
+		if contentSize > maxImageSize {
+			return status.Errorf(codes.InvalidArgument, "image is too large: %d > %d", contentSize, maxImageSize)
+		}
+
+		_, err = contentData.Write(chunk)
+		if err != nil {
+			return status.Errorf(codes.Internal, "cannot write chunk data: %v", err)
+		}
+	}
+
+	contentID, contentInfo, err := s.ContentStore.Save(sourceID, contentType, contentData)
+	if err != nil {
+		return status.Errorf(codes.Internal, "cannot save content to the store: %v", err)
+	}
+
+	_, err = s.DB.UploadContent(stream.Context(), genDB.UploadContentParams{
+		ContentID:     contentID,
+		Filename:      sql.NullString{String: contentInfo.Path, Valid: true},
+		ContentType:   genDB.ContentType(contentInfo.ContentType),
+		ContentSource: genDB.ContentSource(sourceType),
+		SourceID:      sourceID,
+	})
+	if err != nil {
+		return err
+	}
+
+	switch sourceType {
+	case listingsPB.ContentInfo_APARTMENT:
+		err = s.DB.AppendContentApartment(stream.Context(), genDB.AppendContentApartmentParams{
+			ApartmentID: sourceID,
+			ArrayAppend: contentInfo.Path,
+		})
+		if err != nil {
+			return status.Errorf(codes.Internal, "error appending content to apartment: %v", err)
+		}
+	case listingsPB.ContentInfo_BUILDING:
+		err = s.DB.AppendContentBuilding(stream.Context(), genDB.AppendContentBuildingParams{
+			BuildingID:  sourceID,
+			ArrayAppend: contentInfo.Path,
+		})
+		if err != nil {
+			return status.Errorf(codes.Internal, "error appending content to building: %v", err)
+		}
+	}
+
+	res := &listingsPB.UploadContentResponse{
+		ContentId: contentID,
+		Size:      uint32(contentSize),
+	}
+
+	err = stream.SendAndClose(res)
+	if err != nil {
+		return status.Errorf(codes.Unknown, "cannot send response: %v", err)
+	}
+
+	log.Printf("saved content with id: %v, size: %d", contentID, contentSize)
+	return nil
 }
 
 func ApartmentDBtoPB(apartment genDB.Apartment) *listingsPB.Apartment {
@@ -327,5 +443,16 @@ func RealtorDBtoPB(realtor genDB.Realtor) *listingsPB.Realtor {
 		Email:       realtor.Email.String,
 		PhoneNumber: realtor.PhoneNumber.String,
 		Company:     realtor.Company.String,
+	}
+}
+
+func contextError(ctx context.Context) error {
+	switch ctx.Err() {
+	case context.Canceled:
+		return status.Error(codes.Canceled, "request is canceled")
+	case context.DeadlineExceeded:
+		return status.Error(codes.DeadlineExceeded, "deadline is exceeded")
+	default:
+		return nil
 	}
 }

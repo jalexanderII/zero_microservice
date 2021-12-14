@@ -11,6 +11,38 @@ import (
 	"github.com/lib/pq"
 )
 
+const appendContentApartment = `-- name: AppendContentApartment :exec
+UPDATE apartments
+SET upload_ids = array_append(upload_ids, $2)
+WHERE apartment_id = $1
+`
+
+type AppendContentApartmentParams struct {
+	ApartmentID int32       `json:"apartment_id"`
+	ArrayAppend interface{} `json:"array_append"`
+}
+
+func (q *Queries) AppendContentApartment(ctx context.Context, arg AppendContentApartmentParams) error {
+	_, err := q.db.ExecContext(ctx, appendContentApartment, arg.ApartmentID, arg.ArrayAppend)
+	return err
+}
+
+const appendContentBuilding = `-- name: AppendContentBuilding :exec
+UPDATE buildings
+SET upload_ids = array_append(upload_ids, $2)
+WHERE building_id = $1
+`
+
+type AppendContentBuildingParams struct {
+	BuildingID  int32       `json:"building_id"`
+	ArrayAppend interface{} `json:"array_append"`
+}
+
+func (q *Queries) AppendContentBuilding(ctx context.Context, arg AppendContentBuildingParams) error {
+	_, err := q.db.ExecContext(ctx, appendContentBuilding, arg.BuildingID, arg.ArrayAppend)
+	return err
+}
+
 const createApartment = `-- name: CreateApartment :one
 INSERT INTO apartments (apartment_id,
                         name,
@@ -681,4 +713,45 @@ func (q *Queries) UpdateRealtor(ctx context.Context, arg UpdateRealtorParams) er
 		arg.Company,
 	)
 	return err
+}
+
+const uploadContent = `-- name: UploadContent :one
+INSERT INTO content (content_id,
+                     filename,
+                     content_type,
+                     content_source,
+                     source_id)
+VALUES ($1,
+        $2,
+        $3,
+        $4,
+        $5)
+RETURNING content_id, filename, content_type, content_source, source_id
+`
+
+type UploadContentParams struct {
+	ContentID     int32          `json:"content_id"`
+	Filename      sql.NullString `json:"filename"`
+	ContentType   ContentType    `json:"content_type"`
+	ContentSource ContentSource  `json:"content_source"`
+	SourceID      int32          `json:"source_id"`
+}
+
+func (q *Queries) UploadContent(ctx context.Context, arg UploadContentParams) (Content, error) {
+	row := q.db.QueryRowContext(ctx, uploadContent,
+		arg.ContentID,
+		arg.Filename,
+		arg.ContentType,
+		arg.ContentSource,
+		arg.SourceID,
+	)
+	var i Content
+	err := row.Scan(
+		&i.ContentID,
+		&i.Filename,
+		&i.ContentType,
+		&i.ContentSource,
+		&i.SourceID,
+	)
+	return i, err
 }
