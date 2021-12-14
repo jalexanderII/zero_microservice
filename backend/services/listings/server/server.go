@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -19,7 +20,7 @@ func NewListingsServer(db *listingsDB.ListingsDB) *listingsServer {
 
 func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.CreateApartmentRequest) (*listingsPB.Apartment, error) {
 	var apartmentpb = in.Apartment
-	apartment, err := s.DB.CreateApartment(ctx, listingsDB.CreateApartmentParams{
+	apartment, err := s.DB.CreateApartment(ctx, genDB.CreateApartmentParams{
 		ApartmentID:  apartmentpb.Id,
 		Name:         apartmentpb.Name,
 		FullAddress:  apartmentpb.FullAddress,
@@ -72,7 +73,7 @@ func (s listingsServer) ListApartments(ctx context.Context, in *listingsPB.ListA
 
 func (s listingsServer) UpdateApartment(ctx context.Context, in *listingsPB.UpdateApartmentRequest) (*listingsPB.Apartment, error) {
 	var apartmentpb = in.Apartment
-	err := s.DB.UpdateApartment(ctx, listingsDB.UpdateApartmentParams{
+	err := s.DB.UpdateApartment(ctx, genDB.UpdateApartmentParams{
 		ApartmentID:  apartmentpb.Id,
 		Name:         apartmentpb.Name,
 		FullAddress:  apartmentpb.FullAddress,
@@ -118,7 +119,7 @@ func (s listingsServer) DeleteApartment(ctx context.Context, in *listingsPB.Dele
 
 func (s listingsServer) CreateBuilding(ctx context.Context, in *listingsPB.CreateBuildingRequest) (*listingsPB.Building, error) {
 	var buildingpb = in.Building
-	building, err := s.DB.CreateBuilding(ctx, listingsDB.CreateBuildingParams{
+	building, err := s.DB.CreateBuilding(ctx, genDB.CreateBuildingParams{
 		BuildingID:   buildingpb.Id,
 		Name:         buildingpb.Name,
 		FullAddress:  buildingpb.FullAddress,
@@ -162,7 +163,7 @@ func (s listingsServer) ListBuildings(ctx context.Context, in *listingsPB.ListBu
 
 func (s listingsServer) UpdateBuilding(ctx context.Context, in *listingsPB.UpdateBuildingRequest) (*listingsPB.Building, error) {
 	var buildingpb = in.Building
-	err := s.DB.UpdateBuilding(ctx, listingsDB.UpdateBuildingParams{
+	err := s.DB.UpdateBuilding(ctx, genDB.UpdateBuildingParams{
 		BuildingID:   buildingpb.Id,
 		Name:         buildingpb.Name,
 		FullAddress:  buildingpb.FullAddress,
@@ -199,7 +200,7 @@ func (s listingsServer) DeleteBuilding(ctx context.Context, in *listingsPB.Delet
 
 func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.CreateRealtorRequest) (*listingsPB.Realtor, error) {
 	var realtorpb = in.Realtor
-	realtor, err := s.DB.CreateRealtor(ctx, listingsDB.CreateRealtorParams{
+	realtor, err := s.DB.CreateRealtor(ctx, genDB.CreateRealtorParams{
 		RealtorID:   realtorpb.Id,
 		Name:        realtorpb.Name,
 		Email:       sql.NullString{String: realtorpb.Email, Valid: true},
@@ -234,7 +235,7 @@ func (s listingsServer) ListRealtors(ctx context.Context, in *listingsPB.ListRea
 
 func (s listingsServer) UpdateRealtor(ctx context.Context, in *listingsPB.UpdateRealtorRequest) (*listingsPB.Realtor, error) {
 	var realtorpb = in.Realtor
-	err := s.DB.UpdateRealtor(ctx, listingsDB.UpdateRealtorParams{
+	err := s.DB.UpdateRealtor(ctx, genDB.UpdateRealtorParams{
 		RealtorID:   realtorpb.Id,
 		Name:        realtorpb.Name,
 		Email:       sql.NullString{String: realtorpb.Email, Valid: true},
@@ -272,7 +273,7 @@ func (s listingsServer) DeletePhoto(ctx context.Context, in *listingsPB.DeletePh
 	return nil, nil
 }
 
-func ApartmentDBtoPB(apartment listingsDB.Apartment) *listingsPB.Apartment {
+func ApartmentDBtoPB(apartment genDB.Apartment) *listingsPB.Apartment {
 	return &listingsPB.Apartment{
 		Id:           apartment.ApartmentID,
 		Name:         apartment.Name,
@@ -300,7 +301,7 @@ func ApartmentDBtoPB(apartment listingsDB.Apartment) *listingsPB.Apartment {
 	}
 }
 
-func BuildingDBtoPB(building listingsDB.Building) *listingsPB.Building {
+func BuildingDBtoPB(building genDB.Building) *listingsPB.Building {
 	return &listingsPB.Building{
 		Id:           building.BuildingID,
 		Name:         building.Name,
@@ -319,7 +320,7 @@ func BuildingDBtoPB(building listingsDB.Building) *listingsPB.Building {
 	}
 }
 
-func RealtorDBtoPB(realtor listingsDB.Realtor) *listingsPB.Realtor {
+func RealtorDBtoPB(realtor genDB.Realtor) *listingsPB.Realtor {
 	return &listingsPB.Realtor{
 		Id:          realtor.RealtorID,
 		Name:        realtor.Name,

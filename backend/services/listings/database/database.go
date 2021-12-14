@@ -8,16 +8,17 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	config "github.com/jalexanderII/zero_microservice"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
 	_ "github.com/lib/pq"
 )
 
 type ListingsDB struct {
-	*Queries
+	*genDB.Queries
 	DB *sql.DB
 }
 
 func NewListingsDB(db *sql.DB) *ListingsDB {
-	return &ListingsDB{DB: db, Queries: New(db)}
+	return &ListingsDB{DB: db, Queries: genDB.New(db)}
 }
 
 func ConnectToDB() (*sql.DB, error) {
