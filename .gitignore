@@ -16,3 +16,7 @@
 
 # gRPC Proto generated files
 gen/
+
+const.go
+
+.idea

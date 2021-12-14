@@ -6,10 +6,9 @@ import (
 	"log"
 	"net"
 
+	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/server"
 	"github.com/jalexanderII/zero_microservice/gen/listings"
-	"github.com/jalexanderII/zero_microservice/global"
-	listingDB "github.com/jalexanderII/zero_microservice/global/db/listings"
 	"google.golang.org/grpc"
 )
 
@@ -25,14 +24,12 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	server.ApartmentCollection = *listingDB.DB.Collection(global.ApartmentCollection)
-	server.BuildingCollection = *listingDB.DB.Collection(global.BuildingCollection)
-	server.RealtorCollection = *listingDB.DB.Collection(global.RealtorCollection)
-
+	db, err := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
 	var opts []grpc.ServerOption
 
 	grpcServer := grpc.NewServer(opts...)
-	listings.RegisterListingsServer(grpcServer, server.NewListingsServer())
+	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB))
 	log.Printf("Server started at %v", lis.Addr().String())
 
 	if err := grpcServer.Serve(lis); err != nil {

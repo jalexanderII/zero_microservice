@@ -4,19 +4,23 @@ package listings;
 option go_package = "./proto;listings";
 
 import "google/protobuf/field_mask.proto";
-import "realtor.proto";
-import "common.proto";
 import "content.proto";
 
 message Building {
-  string id = 1;
+  int32 id = 1;
   string name = 2;
-  Place address = 3;
-  string description = 9;
-  repeated string amenities = 10;
-  repeated Content uploads = 11;
-  string realtor_ref = 13;
-  Realtor realtor = 14;
+  string full_address = 3;
+  string street = 4;
+  string city = 5;
+  string state = 6;
+  int32 zip_code = 7;
+  string neighborhood = 8;
+  double lat = 9;
+  double lng = 10;
+  string description = 11;
+  repeated string amenities = 12;
+  repeated string upload_ids = 13;
+  int32 realtor_ref = 14;
 }
 
 // Service Methods
@@ -25,17 +29,17 @@ message CreateBuildingRequest {
 }
 
 message GetBuildingRequest {
-  string id = 1;
+  int32 id = 1;
 }
 
 message UpdateBuildingRequest {
-  string id = 1;
+  int32 id = 1;
   Building building = 2;
   google.protobuf.FieldMask mask = 3;
 }
 
 message DeleteBuildingRequest {
-  string id = 1;
+  int32 id = 1;
 }
 
 message ListBuildingRequest {}

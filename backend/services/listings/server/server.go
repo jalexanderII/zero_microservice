@@ -2,191 +2,142 @@ package server
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"log"
-	"time"
+	"database/sql"
 
-	"github.com/jalexanderII/zero_microservice/gen/listings"
-	listingDB "github.com/jalexanderII/zero_microservice/global/db/listings"
-	"github.com/jalexanderII/zero_microservice/global/db/listings/collections"
-	"github.com/jalexanderII/zero_microservice/global/db/listings/models"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
+	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var (
-	ApartmentCollection mongo.Collection
-	BuildingCollection  mongo.Collection
-	RealtorCollection   mongo.Collection
-)
-
-type listingsServer struct{}
-
-func NewListingsServer() *listingsServer {
-	return &listingsServer{}
+type listingsServer struct {
+	DB *listingsDB.ListingsDB
 }
 
-func (listingsServer) CreateApartment(ctx context.Context, in *listings.CreateApartmentRequest) (*listings.Apartment, error) {
-	apartment := in.Apartment
-	address := apartment.GetAddress()
-	uploads, err := getContentFromPb(apartment.GetUploads())
+func NewListingsServer(db *listingsDB.ListingsDB) *listingsServer {
+	return &listingsServer{db}
+}
+
+func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.CreateApartmentRequest) (*listingsPB.Apartment, error) {
+	var apartmentpb = in.Apartment
+	apartment, err := s.DB.CreateApartment(ctx, listingsDB.CreateApartmentParams{
+		ApartmentID:  apartmentpb.Id,
+		Name:         apartmentpb.Name,
+		FullAddress:  apartmentpb.FullAddress,
+		Street:       apartmentpb.Street,
+		City:         apartmentpb.City,
+		State:        apartmentpb.State,
+		ZipCode:      apartmentpb.ZipCode,
+		Neighborhood: apartmentpb.Neighborhood,
+		Unit:         sql.NullString{String: apartmentpb.Unit, Valid: true},
+		Lat:          int32(apartmentpb.Lat),
+		Lng:          int32(apartmentpb.Lng),
+		Rent:         apartmentpb.Rent,
+		Sqft:         sql.NullInt32{Int32: apartmentpb.Sqft, Valid: true},
+		Beds:         apartmentpb.Beds,
+		Baths:        apartmentpb.Baths,
+		AvailableOn:  apartmentpb.AvailableOn.AsTime(),
+		DaysOnMarket: sql.NullInt32{Int32: apartmentpb.DaysOnMarket, Valid: true},
+		Description:  sql.NullString{String: apartmentpb.Description, Valid: true},
+		Amenities:    apartmentpb.Amenities,
+		UploadIds:    apartmentpb.UploadIds,
+		IsArchived:   apartmentpb.IsArchived,
+		BuildingID:   apartmentpb.BuildingRef,
+		RealtorID:    apartmentpb.RealtorRef,
+	})
 	if err != nil {
-		log.Printf("Error getting uploads source: %v\n", err)
-		return nil, errors.New("something went wrong")
+		return nil, err
 	}
-
-	ctx, cancel := listingDB.NewDBContext(5 * time.Second)
-	defer cancel()
-
-	buildingRef, err := primitive.ObjectIDFromHex(apartment.GetBuildingRef())
-	if err != nil {
-		log.Printf("Error getting building ref: %v\n", err)
-		return nil, errors.New("something went wrong")
-	}
-	realtorRef, err := primitive.ObjectIDFromHex(apartment.GetRealtorRef())
-	if err != nil {
-		log.Printf("Error getting realtor ref: %v\n", err)
-		return nil, errors.New("something went wrong")
-	}
-
-	newApartment := collections.Apartment{
-		ID:   primitive.NewObjectID(),
-		Name: apartment.GetName(),
-		Address: models.Place{
-			FullAddress:  address.FullAddress,
-			Street:       address.Street,
-			City:         address.City,
-			State:        address.State,
-			ZipCode:      address.ZipCode,
-			Neighborhood: address.Neighborhood,
-			Unit:         *address.Unit,
-			Coordinates:  models.Coordinates{Lat: address.Coordinates.Lat, Lng: address.Coordinates.Lng},
-		},
-		Rent:  apartment.GetRent(),
-		Sqft:  apartment.GetSqft(),
-		Beds:  apartment.GetBeds(),
-		Baths: apartment.GetBaths(),
-		ListingMetrics: models.ListingMetrics{
-			AvailableOn:  apartment.GetListingMetrics().AvailableOn.AsTime(),
-			DaysOnMarket: apartment.GetListingMetrics().DaysOnMarket,
-		},
-		Description: apartment.GetDescription(),
-		Amenities:   apartment.GetAmenities(),
-		Uploads:     uploads,
-		IsArchived:  apartment.GetIsArchived(),
-		BuildingRef: buildingRef,
-		RealtorRef:  realtorRef,
-	}
-	res, err := ApartmentCollection.InsertOne(ctx, newApartment)
-	if err != nil {
-		log.Printf("Error inserting new user: %v\n", err)
-		return nil, errors.New("Something went wrong")
-	}
-	fmt.Printf("inserted document with ID %v\n", res.InsertedID)
-
-	var result listings.Apartment
-	err = ApartmentCollection.FindOne(ctx, bson.M{"ID": res.InsertedID}).Decode(&result)
-	if err != nil {
-		return nil, fmt.Errorf("something went wrong: %v", err)
-	}
-	return &result, nil
+	return &listingsPB.Apartment{
+		Id:           apartment.ApartmentID,
+		Name:         apartment.Name,
+		FullAddress:  apartment.FullAddress,
+		Street:       apartment.Street,
+		City:         apartment.City,
+		State:        apartment.State,
+		ZipCode:      apartment.ZipCode,
+		Neighborhood: apartment.Neighborhood,
+		Unit:         apartment.Unit.String,
+		Lat:          float64(apartment.Lat),
+		Lng:          float64(int32(apartment.Lng)),
+		Rent:         apartment.Rent,
+		Sqft:         apartment.Sqft.Int32,
+		Beds:         apartment.Beds,
+		Baths:        apartment.Baths,
+		AvailableOn:  timestamppb.New(apartment.AvailableOn),
+		DaysOnMarket: apartment.DaysOnMarket.Int32,
+		Description:  apartment.Description.String,
+		Amenities:    apartment.Amenities,
+		UploadIds:    apartment.UploadIds,
+		IsArchived:   apartment.IsArchived,
+		BuildingRef:  apartment.BuildingID,
+		RealtorRef:   apartment.RealtorID,
+	}, nil
 }
 
-func (listingsServer) GetApartment(context.Context, *listings.GetApartmentRequest) (*listings.Apartment, error) {
+func (listingsServer) GetApartment(context.Context, *listingsPB.GetApartmentRequest) (*listingsPB.Apartment, error) {
 	return nil, nil
 }
 
-func (listingsServer) ListApartments(context.Context, *listings.ListApartmentRequest) (*listings.ListApartmentResponse, error) {
+func (listingsServer) ListApartments(context.Context, *listingsPB.ListApartmentRequest) (*listingsPB.ListApartmentResponse, error) {
 	return nil, nil
 }
 
-func (listingsServer) UpdateApartment(context.Context, *listings.UpdateApartmentRequest) (*listings.Apartment, error) {
+func (listingsServer) UpdateApartment(context.Context, *listingsPB.UpdateApartmentRequest) (*listingsPB.Apartment, error) {
 	return nil, nil
 }
 
-func (listingsServer) DeleteApartment(context.Context, *listings.DeleteApartmentRequest) (*listings.DeleteApartmentResponse, error) {
+func (listingsServer) DeleteApartment(context.Context, *listingsPB.DeleteApartmentRequest) (*listingsPB.DeleteApartmentResponse, error) {
 	return nil, nil
 }
 
-func (listingsServer) CreateBuilding(context.Context, *listings.CreateBuildingRequest) (*listings.Building, error) {
+func (listingsServer) CreateBuilding(context.Context, *listingsPB.CreateBuildingRequest) (*listingsPB.Building, error) {
 	return nil, nil
 }
 
-func (listingsServer) GetBuilding(context.Context, *listings.GetBuildingRequest) (*listings.Building, error) {
+func (listingsServer) GetBuilding(context.Context, *listingsPB.GetBuildingRequest) (*listingsPB.Building, error) {
 	return nil, nil
 }
 
-func (listingsServer) ListBuildings(context.Context, *listings.ListBuildingRequest) (*listings.ListBuildingResponse, error) {
+func (listingsServer) ListBuildings(context.Context, *listingsPB.ListBuildingRequest) (*listingsPB.ListBuildingResponse, error) {
 	return nil, nil
 }
 
-func (listingsServer) UpdateBuilding(context.Context, *listings.UpdateBuildingRequest) (*listings.Building, error) {
+func (listingsServer) UpdateBuilding(context.Context, *listingsPB.UpdateBuildingRequest) (*listingsPB.Building, error) {
 	return nil, nil
 }
 
-func (listingsServer) DeleteBuilding(context.Context, *listings.DeleteBuildingRequest) (*listings.DeleteBuildingResponse, error) {
+func (listingsServer) DeleteBuilding(context.Context, *listingsPB.DeleteBuildingRequest) (*listingsPB.DeleteBuildingResponse, error) {
 	return nil, nil
 }
 
-func (listingsServer) CreateRealtor(context.Context, *listings.CreateRealtorRequest) (*listings.Realtor, error) {
+func (listingsServer) CreateRealtor(context.Context, *listingsPB.CreateRealtorRequest) (*listingsPB.Realtor, error) {
 	return nil, nil
 }
 
-func (listingsServer) GetRealtor(context.Context, *listings.GetRealtorRequest) (*listings.Realtor, error) {
+func (listingsServer) GetRealtor(context.Context, *listingsPB.GetRealtorRequest) (*listingsPB.Realtor, error) {
 	return nil, nil
 }
 
-func (listingsServer) ListRealtors(context.Context, *listings.ListRealtorRequest) (*listings.ListRealtorResponse, error) {
+func (listingsServer) ListRealtors(context.Context, *listingsPB.ListRealtorRequest) (*listingsPB.ListRealtorResponse, error) {
 	return nil, nil
 }
 
-func (listingsServer) UpdateRealtor(context.Context, *listings.UpdateRealtorRequest) (*listings.Realtor, error) {
+func (listingsServer) UpdateRealtor(context.Context, *listingsPB.UpdateRealtorRequest) (*listingsPB.Realtor, error) {
 	return nil, nil
 }
 
-func (listingsServer) DeleteRealtor(context.Context, *listings.DeleteRealtorRequest) (*listings.DeleteRealtorResponse, error) {
+func (listingsServer) DeleteRealtor(context.Context, *listingsPB.DeleteRealtorRequest) (*listingsPB.DeleteRealtorResponse, error) {
 	return nil, nil
 }
 
-func (listingsServer) UploadPhoto(listings.Listings_UploadPhotoServer) error {
+func (listingsServer) UploadPhoto(listingsPB.Listings_UploadPhotoServer) error {
 	return nil
 }
 
-func (listingsServer) StreamPhotos(listings.Listings_StreamPhotosServer) error {
+func (listingsServer) StreamPhotos(listingsPB.Listings_StreamPhotosServer) error {
 	return nil
 }
 
-func (listingsServer) DeletePhoto(context.Context, *listings.DeletePhotoRequest) (*listings.DeletePhotoResponse, error) {
+func (listingsServer) DeletePhoto(context.Context, *listingsPB.DeletePhotoRequest) (*listingsPB.DeletePhotoResponse, error) {
 	return nil, nil
-}
-
-func getContentFromPb(contentPb []*listings.Content) ([]models.Content, error) {
-	contents := make([]models.Content, len(contentPb))
-	for idx, res := range contentPb {
-		s, err := getContentSource(res)
-		if err != nil {
-			return nil, err
-		}
-		contents[idx] = models.Content{
-			Id:       res.GetId(),
-			Filename: res.GetFilename(),
-			FileId:   res.GetFileId(),
-			Source:   s,
-			Type:     res.GetType(),
-		}
-	}
-	return contents, nil
-}
-
-func getContentSource(res *listings.Content) (models.IsContentSource, error) {
-	switch s := res.GetSource().(type) {
-	case *listings.Content_ApartmentRef:
-		return &models.ContentApartmentRef{ApartmentRef: s.ApartmentRef}, nil
-	case *listings.Content_BuildingRef:
-		return &models.ContentBuildingRef{BuildingRef: s.BuildingRef}, nil
-	default:
-		return nil, fmt.Errorf("incorrect content source")
-	}
 }

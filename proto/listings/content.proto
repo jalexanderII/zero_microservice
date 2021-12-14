@@ -3,8 +3,6 @@ syntax = "proto3";
 package listings;
 option go_package = "./proto;listings";
 
-import "common.proto";
-
 message Content {
   enum Type {
     TYPE_UNKNOWN = 0;
@@ -12,14 +10,20 @@ message Content {
     VIDEO = 2;
   }
 
-  string id = 1;
+  int32 id = 1;
   string filename = 2;
-  bytes file_id = 3;
+  int32 file_id = 3;
   oneof source {
-    string apartment_ref = 4;
-    string building_ref = 5;
+    int32 apartment_ref = 4;
+    int32 building_ref = 5;
   }
   Type type = 6;
+}
+
+enum STATUS {
+  STATUS_UNKNOWN = 0;
+  SUCCESS = 1;
+  FAIL = 2;
 }
 
 message ContentDataBlock {
@@ -27,17 +31,18 @@ message ContentDataBlock {
 }
 
 message GetContentRequest {
-  string id = 1;
+  int32 id = 1;
   string filename = 2;
-  bytes file_id = 3;
+  int32 file_id = 3;
 }
 
 message DeletePhotoRequest {
-  string id = 1;
+  int32 id = 1;
   string filename = 2;
-  bytes file_id = 3;
+  int32 file_id = 3;
 }
 
 message DeletePhotoResponse {
   STATUS status = 1;
 }
+
