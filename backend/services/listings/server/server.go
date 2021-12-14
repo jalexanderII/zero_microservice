@@ -71,19 +71,81 @@ func (s listingsServer) ListApartments(ctx context.Context, in *listingsPB.ListA
 }
 
 func (s listingsServer) UpdateApartment(ctx context.Context, in *listingsPB.UpdateApartmentRequest) (*listingsPB.Apartment, error) {
-	return nil, nil
+	var apartmentpb = in.Apartment
+	err := s.DB.UpdateApartment(ctx, listingsDB.UpdateApartmentParams{
+		ApartmentID:  apartmentpb.Id,
+		Name:         apartmentpb.Name,
+		FullAddress:  apartmentpb.FullAddress,
+		Street:       apartmentpb.Street,
+		City:         apartmentpb.City,
+		State:        apartmentpb.State,
+		ZipCode:      apartmentpb.ZipCode,
+		Neighborhood: apartmentpb.Neighborhood,
+		Unit:         sql.NullString{String: apartmentpb.Unit, Valid: true},
+		Lat:          int32(apartmentpb.Lat),
+		Lng:          int32(apartmentpb.Lng),
+		Rent:         apartmentpb.Rent,
+		Sqft:         sql.NullInt32{Int32: apartmentpb.Sqft, Valid: true},
+		Beds:         apartmentpb.Beds,
+		Baths:        apartmentpb.Baths,
+		AvailableOn:  apartmentpb.AvailableOn.AsTime(),
+		DaysOnMarket: sql.NullInt32{Int32: apartmentpb.DaysOnMarket, Valid: true},
+		Description:  sql.NullString{String: apartmentpb.Description, Valid: true},
+		Amenities:    apartmentpb.Amenities,
+		UploadIds:    apartmentpb.UploadIds,
+		IsArchived:   apartmentpb.IsArchived,
+		BuildingID:   apartmentpb.BuildingRef,
+		RealtorID:    apartmentpb.RealtorRef,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return apartmentpb, nil
 }
 
 func (s listingsServer) DeleteApartment(ctx context.Context, in *listingsPB.DeleteApartmentRequest) (*listingsPB.DeleteApartmentResponse, error) {
-	return nil, nil
+	apartment, err := s.DB.GetApartment(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.DB.DeleteApartment(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &listingsPB.DeleteApartmentResponse{Status: listingsPB.STATUS_SUCCESS, Apartment: ApartmentDBtoPB(apartment)}, nil
 }
 
 func (s listingsServer) CreateBuilding(ctx context.Context, in *listingsPB.CreateBuildingRequest) (*listingsPB.Building, error) {
-	return nil, nil
+	var buildingpb = in.Building
+	building, err := s.DB.CreateBuilding(ctx, listingsDB.CreateBuildingParams{
+		BuildingID:   buildingpb.Id,
+		Name:         buildingpb.Name,
+		FullAddress:  buildingpb.FullAddress,
+		Street:       buildingpb.Street,
+		City:         buildingpb.City,
+		State:        buildingpb.State,
+		ZipCode:      buildingpb.ZipCode,
+		Neighborhood: buildingpb.Neighborhood,
+		Lat:          int32(buildingpb.Lat),
+		Lng:          int32(buildingpb.Lng),
+		Description:  sql.NullString{String: buildingpb.Description, Valid: true},
+		Amenities:    buildingpb.Amenities,
+		UploadIds:    buildingpb.UploadIds,
+		RealtorID:    buildingpb.RealtorRef,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return BuildingDBtoPB(building), nil
 }
 
 func (s listingsServer) GetBuilding(ctx context.Context, in *listingsPB.GetBuildingRequest) (*listingsPB.Building, error) {
-	return nil, nil
+	building, err := s.DB.GetBuilding(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+	return BuildingDBtoPB(building), nil
 }
 
 func (s listingsServer) ListBuildings(ctx context.Context, in *listingsPB.ListBuildingRequest) (*listingsPB.ListBuildingResponse, error) {
@@ -99,7 +161,18 @@ func (s listingsServer) DeleteBuilding(ctx context.Context, in *listingsPB.Delet
 }
 
 func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.CreateRealtorRequest) (*listingsPB.Realtor, error) {
-	return nil, nil
+	var realtorpb = in.Realtor
+	realtor, err := s.DB.CreateRealtor(ctx, listingsDB.CreateRealtorParams{
+		RealtorID:   realtorpb.Id,
+		Name:        realtorpb.Name,
+		Email:       sql.NullString{String: realtorpb.Email, Valid: true},
+		PhoneNumber: sql.NullString{String: realtorpb.PhoneNumber, Valid: true},
+		Company:     sql.NullString{String: realtorpb.Company, Valid: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return RealtorpbDBtoPB(realtor), nil
 }
 
 func (s listingsServer) GetRealtor(ctx context.Context, in *listingsPB.GetRealtorRequest) (*listingsPB.Realtor, error) {
@@ -155,5 +228,34 @@ func ApartmentDBtoPB(apartment listingsDB.Apartment) *listingsPB.Apartment {
 		IsArchived:   apartment.IsArchived,
 		BuildingRef:  apartment.BuildingID,
 		RealtorRef:   apartment.RealtorID,
+	}
+}
+
+func BuildingDBtoPB(building listingsDB.Building) *listingsPB.Building {
+	return &listingsPB.Building{
+		Id:           building.BuildingID,
+		Name:         building.Name,
+		FullAddress:  building.FullAddress,
+		Street:       building.Street,
+		City:         building.City,
+		State:        building.State,
+		ZipCode:      building.ZipCode,
+		Neighborhood: building.Neighborhood,
+		Lat:          float64(building.Lat),
+		Lng:          float64(building.Lng),
+		Description:  building.Description.String,
+		Amenities:    building.Amenities,
+		UploadIds:    building.UploadIds,
+		RealtorRef:   building.RealtorID,
+	}
+}
+
+func RealtorpbDBtoPB(realtor listingsDB.Realtor) *listingsPB.Realtor {
+	return &listingsPB.Realtor{
+		Id:          realtor.RealtorID,
+		Name:        realtor.Name,
+		Email:       realtor.Email.String,
+		PhoneNumber: realtor.PhoneNumber.String,
+		Company:     realtor.Company.String,
 	}
 }

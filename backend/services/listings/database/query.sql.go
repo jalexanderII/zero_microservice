@@ -183,8 +183,8 @@ type CreateBuildingParams struct {
 	State        string         `json:"state"`
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
-	Lat          sql.NullInt32  `json:"lat"`
-	Lng          sql.NullInt32  `json:"lng"`
+	Lat          int32          `json:"lat"`
+	Lng          int32          `json:"lng"`
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
@@ -627,8 +627,8 @@ type UpdateBuildingParams struct {
 	State        string         `json:"state"`
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
-	Lat          sql.NullInt32  `json:"lat"`
-	Lng          sql.NullInt32  `json:"lng"`
+	Lat          int32          `json:"lat"`
+	Lng          int32          `json:"lng"`
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
