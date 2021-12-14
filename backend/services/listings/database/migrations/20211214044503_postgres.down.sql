@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS apartments;
+DROP TABLE IF EXISTS buildings;
+DROP TABLE IF EXISTS realtors;
+DROP TABLE IF EXISTS content;
