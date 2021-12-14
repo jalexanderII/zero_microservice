@@ -255,3 +255,190 @@ func Test_listingsServer_GetBuilding(t *testing.T) {
 		t.Errorf("2: Failed to fetch correct building: %+v", building)
 	}
 }
+
+func Test_listingsServer_ListBuildings(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	buildings, err := server.ListBuildings(ctx, &listingsPB.ListBuildingRequest{})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if buildings.Buildings[0].Name != "Updated" {
+		t.Errorf("2: Failed to fetch buildings: %+v", buildings.Buildings[0])
+	}
+}
+
+func Test_listingsServer_UpdateBuilding(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+	in := &listingsPB.Building{
+		Id:           1,
+		Name:         "Updated",
+		FullAddress:  "Updated",
+		Street:       "Updated",
+		City:         "Updated",
+		State:        "Updated",
+		ZipCode:      10000,
+		Neighborhood: "Updated",
+		Lat:          2143,
+		Lng:          4345,
+		Description:  "Updated",
+		Amenities:    []string{"example", "Updated"},
+		UploadIds:    []string{"example", "Updated"},
+		RealtorRef:   1,
+	}
+	building, err := server.UpdateBuilding(ctx, &listingsPB.UpdateBuildingRequest{Id: 1, Building: in})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if building.Name != "Updated" {
+		t.Errorf("2: Failed to fetch correct building: %+v", building)
+	}
+}
+
+func Test_listingsServer_DeleteBuilding(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	in := &listingsPB.Building{
+		Id:           3,
+		Name:         "to_delete",
+		FullAddress:  "to_delete",
+		Street:       "to_delete",
+		City:         "to_delete",
+		State:        "to_delete",
+		ZipCode:      10000,
+		Neighborhood: "to_delete",
+		Lat:          2143,
+		Lng:          4345,
+		Description:  "to_delete",
+		Amenities:    []string{"to_delete"},
+		UploadIds:    []string{"to_delete"},
+		RealtorRef:   1,
+	}
+	building, err := server.CreateBuilding(ctx, &listingsPB.CreateBuildingRequest{Building: in})
+	if err != nil {
+		t.Errorf("1: An error was returned creating a temp building: %v", err)
+	}
+	buildings, err := server.ListBuildings(ctx, &listingsPB.ListBuildingRequest{})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if len(buildings.Buildings) != 3 {
+		t.Errorf("1: An error adding a temp building, number of buildings in DB: %v", len(buildings.Buildings))
+	}
+
+	deleted, err := server.DeleteBuilding(ctx, &listingsPB.DeleteBuildingRequest{Id: building.Id})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if deleted.Status != listingsPB.STATUS_SUCCESS {
+		t.Errorf("2: Failed to delete building: %+v\n, %+v", deleted.Status, deleted.GetBuilding())
+	}
+}
+
+func Test_listingsServer_GetRealtor(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	realtor, err := server.GetRealtor(ctx, &listingsPB.GetRealtorRequest{Id: 2})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if realtor.Name != "example2" {
+		t.Errorf("2: Failed to fetch correct realtor: %+v", realtor)
+	}
+}
+
+func Test_listingsServer_ListRealtors(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if realtors.Realtors[0].Name != "example" {
+		t.Errorf("2: Failed to fetch realtors: %+v", realtors.Realtors[0])
+	}
+}
+
+func Test_listingsServer_UpdateRealtor(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+	in := &listingsPB.Realtor{
+		Id:          1,
+		Name:        "Updated",
+		Email:       "Updated",
+		PhoneNumber: "Updated",
+		Company:     "Updated",
+	}
+	realtor, err := server.UpdateRealtor(ctx, &listingsPB.UpdateRealtorRequest{Id: 1, Realtor: in})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if realtor.Name != "Updated" {
+		t.Errorf("2: Failed to fetch correct realtor: %+v", realtor)
+	}
+}
+
+func Test_listingsServer_DeleteRealtor(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	in := &listingsPB.Realtor{
+		Id:          3,
+		Name:        "to_delete",
+		Email:       "to_delete",
+		PhoneNumber: "to_delete",
+		Company:     "to_delete",
+	}
+	realtor, err := server.CreateRealtor(ctx, &listingsPB.CreateRealtorRequest{Realtor: in})
+	if err != nil {
+		t.Errorf("1: An error was returned creating a temp realtor: %v", err)
+	}
+	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if len(realtors.Realtors) != 3 {
+		t.Errorf("1: An error adding a temp realtor, number of realtors in DB: %v", len(realtors.Realtors))
+	}
+
+	deleted, err := server.DeleteRealtor(ctx, &listingsPB.DeleteRealtorRequest{Id: realtor.Id})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if deleted.Status != listingsPB.STATUS_SUCCESS {
+		t.Errorf("2: Failed to delete realtor: %+v\n, %+v", deleted.Status, deleted.GetRealtor())
+	}
+}

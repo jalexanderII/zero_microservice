@@ -149,15 +149,52 @@ func (s listingsServer) GetBuilding(ctx context.Context, in *listingsPB.GetBuild
 }
 
 func (s listingsServer) ListBuildings(ctx context.Context, in *listingsPB.ListBuildingRequest) (*listingsPB.ListBuildingResponse, error) {
-	return nil, nil
+	buildings, err := s.DB.ListBuildings(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*listingsPB.Building, len(buildings))
+	for idx, building := range buildings {
+		res[idx] = BuildingDBtoPB(building)
+	}
+	return &listingsPB.ListBuildingResponse{Buildings: res}, nil
 }
 
 func (s listingsServer) UpdateBuilding(ctx context.Context, in *listingsPB.UpdateBuildingRequest) (*listingsPB.Building, error) {
-	return nil, nil
+	var buildingpb = in.Building
+	err := s.DB.UpdateBuilding(ctx, listingsDB.UpdateBuildingParams{
+		BuildingID:   buildingpb.Id,
+		Name:         buildingpb.Name,
+		FullAddress:  buildingpb.FullAddress,
+		Street:       buildingpb.Street,
+		City:         buildingpb.City,
+		State:        buildingpb.State,
+		ZipCode:      buildingpb.ZipCode,
+		Neighborhood: buildingpb.Neighborhood,
+		Lat:          int32(buildingpb.Lat),
+		Lng:          int32(buildingpb.Lng),
+		Description:  sql.NullString{String: buildingpb.Description, Valid: true},
+		Amenities:    buildingpb.Amenities,
+		UploadIds:    buildingpb.UploadIds,
+		RealtorID:    buildingpb.RealtorRef,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return buildingpb, nil
 }
 
 func (s listingsServer) DeleteBuilding(ctx context.Context, in *listingsPB.DeleteBuildingRequest) (*listingsPB.DeleteBuildingResponse, error) {
-	return nil, nil
+	building, err := s.DB.GetBuilding(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.DB.DeleteBuilding(ctx, building.BuildingID)
+	if err != nil {
+		return nil, err
+	}
+	return &listingsPB.DeleteBuildingResponse{Status: listingsPB.STATUS_SUCCESS, Building: BuildingDBtoPB(building)}, nil
 }
 
 func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.CreateRealtorRequest) (*listingsPB.Realtor, error) {
@@ -172,23 +209,55 @@ func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.Create
 	if err != nil {
 		return nil, err
 	}
-	return RealtorpbDBtoPB(realtor), nil
+	return RealtorDBtoPB(realtor), nil
 }
 
 func (s listingsServer) GetRealtor(ctx context.Context, in *listingsPB.GetRealtorRequest) (*listingsPB.Realtor, error) {
-	return nil, nil
+	realtor, err := s.DB.GetRealtor(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+	return RealtorDBtoPB(realtor), nil
 }
 
 func (s listingsServer) ListRealtors(ctx context.Context, in *listingsPB.ListRealtorRequest) (*listingsPB.ListRealtorResponse, error) {
-	return nil, nil
+	realtors, err := s.DB.ListRealtors(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*listingsPB.Realtor, len(realtors))
+	for idx, realtor := range realtors {
+		res[idx] = RealtorDBtoPB(realtor)
+	}
+	return &listingsPB.ListRealtorResponse{Realtors: res}, nil
 }
 
 func (s listingsServer) UpdateRealtor(ctx context.Context, in *listingsPB.UpdateRealtorRequest) (*listingsPB.Realtor, error) {
-	return nil, nil
+	var realtorpb = in.Realtor
+	err := s.DB.UpdateRealtor(ctx, listingsDB.UpdateRealtorParams{
+		RealtorID:   realtorpb.Id,
+		Name:        realtorpb.Name,
+		Email:       sql.NullString{String: realtorpb.Email, Valid: true},
+		PhoneNumber: sql.NullString{String: realtorpb.PhoneNumber, Valid: true},
+		Company:     sql.NullString{String: realtorpb.Company, Valid: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return realtorpb, nil
 }
 
 func (s listingsServer) DeleteRealtor(ctx context.Context, in *listingsPB.DeleteRealtorRequest) (*listingsPB.DeleteRealtorResponse, error) {
-	return nil, nil
+	realtor, err := s.DB.GetRealtor(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.DB.DeleteRealtor(ctx, realtor.RealtorID)
+	if err != nil {
+		return nil, err
+	}
+	return &listingsPB.DeleteRealtorResponse{Status: listingsPB.STATUS_SUCCESS, Realtor: RealtorDBtoPB(realtor)}, nil
 }
 
 func (s listingsServer) UploadPhoto(in listingsPB.Listings_UploadPhotoServer) error {
@@ -250,7 +319,7 @@ func BuildingDBtoPB(building listingsDB.Building) *listingsPB.Building {
 	}
 }
 
-func RealtorpbDBtoPB(realtor listingsDB.Realtor) *listingsPB.Realtor {
+func RealtorDBtoPB(realtor listingsDB.Realtor) *listingsPB.Realtor {
 	return &listingsPB.Realtor{
 		Id:          realtor.RealtorID,
 		Name:        realtor.Name,
