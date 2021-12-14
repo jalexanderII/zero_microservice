@@ -11,43 +11,32 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	performance = 100
-)
-
 type ListingsDB struct {
 	*Queries
 	DB *sql.DB
 }
 
 func NewListingsDB(db *sql.DB) *ListingsDB {
-	return &ListingsDB{
-		DB:      db,
-		Queries: New(db),
-	}
+	return &ListingsDB{DB: db, Queries: New(db)}
 }
 
 func ConnectToDB() (*sql.DB, error) {
-	db, err := sql.Open("postgres", fmt.Sprintf("dbname=%s password=%s user=postgres sslmode=disable", "postgres", config.Pass))
+	db, err := sql.Open("postgres", fmt.Sprintf("dbname=%s password=%s user=postgres sslmode=disable", config.DBNAME, config.Pass))
 	if err != nil {
 		panic(err)
 	}
-
 	return db, err
-
 }
 
 // NewDBContext returns a new Context according to app performance
 func NewDBContext(d time.Duration) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), d*performance/100)
+	return context.WithTimeout(context.Background(), d*config.Performance/100)
 }
 
 func ConnectToTestDB() (*sql.DB, error) {
-	db, err := sql.Open("postgres", fmt.Sprintf("dbname=%s password=%s user=postgres sslmode=disable", "example", config.Pass))
+	db, err := sql.Open("postgres", fmt.Sprintf("dbname=%s password=%s user=postgres sslmode=disable", config.TESTDBNAME, config.Pass))
 	if err != nil {
 		panic(err)
 	}
-
 	return db, err
-
 }

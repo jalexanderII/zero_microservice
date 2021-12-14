@@ -17,6 +17,10 @@
 # gRPC Proto generated files
 gen/
 
+# env vars and constants
 const.go
+Makefile
 
+# IDE
 .idea
+
