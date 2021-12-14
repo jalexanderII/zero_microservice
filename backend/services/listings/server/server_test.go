@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"database/sql"
 	"testing"
 	"time"
@@ -15,8 +14,9 @@ func Test_listingsServer_CreateApartment(t *testing.T) {
 	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
 	defer cancel()
 
-	db, err := listingsDB.ConnectToDB()
+	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
 
 	realtor, err := listingDB.CreateRealtor(ctx, listingsDB.CreateRealtorParams{
 		RealtorID:   1,
@@ -49,7 +49,6 @@ func Test_listingsServer_CreateApartment(t *testing.T) {
 		t.Errorf("1: An error was returned: %v", err)
 	}
 
-	server := listingsServer{listingDB}
 	in := &listingsPB.Apartment{
 		Id:           1,
 		Name:         "example",
@@ -75,11 +74,45 @@ func Test_listingsServer_CreateApartment(t *testing.T) {
 		BuildingRef:  building.BuildingID,
 		RealtorRef:   realtor.RealtorID,
 	}
-	apartment, err := server.CreateApartment(context.Background(), &listingsPB.CreateApartmentRequest{Apartment: in})
+	apartment, err := server.CreateApartment(ctx, &listingsPB.CreateApartmentRequest{Apartment: in})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
 	if apartment.Id != in.Id {
 		t.Errorf("2: Failed to create new apartment: %+v", apartment)
+	}
+}
+
+func Test_listingsServer_GetApartment(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	apartment, err := server.GetApartment(ctx, &listingsPB.GetApartmentRequest{Id: 1})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if apartment.Name != "example" {
+		t.Errorf("2: Failed to fetch correct apartment: %+v", apartment)
+	}
+}
+
+func Test_listingsServer_ListApartments(t *testing.T) {
+	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db, _ := listingsDB.ConnectToDB()
+	listingDB := listingsDB.NewListingsDB(db)
+	server := listingsServer{listingDB}
+
+	apartments, err := server.ListApartments(ctx, &listingsPB.ListApartmentRequest{})
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if apartments.Apartments[0].Name != "example" {
+		t.Errorf("2: Failed to fetch apartments: %+v", apartments.Apartments[0])
 	}
 }

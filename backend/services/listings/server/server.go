@@ -47,6 +47,90 @@ func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.Crea
 	if err != nil {
 		return nil, err
 	}
+	return ApartmentDBtoPB(apartment), nil
+}
+
+func (s listingsServer) GetApartment(ctx context.Context, in *listingsPB.GetApartmentRequest) (*listingsPB.Apartment, error) {
+	apartment, err := s.DB.GetApartment(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+	return ApartmentDBtoPB(apartment), nil
+}
+
+func (s listingsServer) ListApartments(ctx context.Context, in *listingsPB.ListApartmentRequest) (*listingsPB.ListApartmentResponse, error) {
+	apartments, err := s.DB.ListApartments(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*listingsPB.Apartment, len(apartments))
+	for idx, apartment := range apartments {
+		res[idx] = ApartmentDBtoPB(apartment)
+	}
+	return &listingsPB.ListApartmentResponse{Apartments: res}, nil
+}
+
+func (s listingsServer) UpdateApartment(ctx context.Context, in *listingsPB.UpdateApartmentRequest) (*listingsPB.Apartment, error) {
+	return nil, nil
+}
+
+func (s listingsServer) DeleteApartment(ctx context.Context, in *listingsPB.DeleteApartmentRequest) (*listingsPB.DeleteApartmentResponse, error) {
+	return nil, nil
+}
+
+func (s listingsServer) CreateBuilding(ctx context.Context, in *listingsPB.CreateBuildingRequest) (*listingsPB.Building, error) {
+	return nil, nil
+}
+
+func (s listingsServer) GetBuilding(ctx context.Context, in *listingsPB.GetBuildingRequest) (*listingsPB.Building, error) {
+	return nil, nil
+}
+
+func (s listingsServer) ListBuildings(ctx context.Context, in *listingsPB.ListBuildingRequest) (*listingsPB.ListBuildingResponse, error) {
+	return nil, nil
+}
+
+func (s listingsServer) UpdateBuilding(ctx context.Context, in *listingsPB.UpdateBuildingRequest) (*listingsPB.Building, error) {
+	return nil, nil
+}
+
+func (s listingsServer) DeleteBuilding(ctx context.Context, in *listingsPB.DeleteBuildingRequest) (*listingsPB.DeleteBuildingResponse, error) {
+	return nil, nil
+}
+
+func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.CreateRealtorRequest) (*listingsPB.Realtor, error) {
+	return nil, nil
+}
+
+func (s listingsServer) GetRealtor(ctx context.Context, in *listingsPB.GetRealtorRequest) (*listingsPB.Realtor, error) {
+	return nil, nil
+}
+
+func (s listingsServer) ListRealtors(ctx context.Context, in *listingsPB.ListRealtorRequest) (*listingsPB.ListRealtorResponse, error) {
+	return nil, nil
+}
+
+func (s listingsServer) UpdateRealtor(ctx context.Context, in *listingsPB.UpdateRealtorRequest) (*listingsPB.Realtor, error) {
+	return nil, nil
+}
+
+func (s listingsServer) DeleteRealtor(ctx context.Context, in *listingsPB.DeleteRealtorRequest) (*listingsPB.DeleteRealtorResponse, error) {
+	return nil, nil
+}
+
+func (s listingsServer) UploadPhoto(in listingsPB.Listings_UploadPhotoServer) error {
+	return nil
+}
+
+func (s listingsServer) StreamPhotos(in listingsPB.Listings_StreamPhotosServer) error {
+	return nil
+}
+
+func (s listingsServer) DeletePhoto(ctx context.Context, in *listingsPB.DeletePhotoRequest) (*listingsPB.DeletePhotoResponse, error) {
+	return nil, nil
+}
+
+func ApartmentDBtoPB(apartment listingsDB.Apartment) *listingsPB.Apartment {
 	return &listingsPB.Apartment{
 		Id:           apartment.ApartmentID,
 		Name:         apartment.Name,
@@ -58,7 +142,7 @@ func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.Crea
 		Neighborhood: apartment.Neighborhood,
 		Unit:         apartment.Unit.String,
 		Lat:          float64(apartment.Lat),
-		Lng:          float64(int32(apartment.Lng)),
+		Lng:          float64(apartment.Lng),
 		Rent:         apartment.Rent,
 		Sqft:         apartment.Sqft.Int32,
 		Beds:         apartment.Beds,
@@ -71,73 +155,5 @@ func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.Crea
 		IsArchived:   apartment.IsArchived,
 		BuildingRef:  apartment.BuildingID,
 		RealtorRef:   apartment.RealtorID,
-	}, nil
-}
-
-func (listingsServer) GetApartment(context.Context, *listingsPB.GetApartmentRequest) (*listingsPB.Apartment, error) {
-	return nil, nil
-}
-
-func (listingsServer) ListApartments(context.Context, *listingsPB.ListApartmentRequest) (*listingsPB.ListApartmentResponse, error) {
-	return nil, nil
-}
-
-func (listingsServer) UpdateApartment(context.Context, *listingsPB.UpdateApartmentRequest) (*listingsPB.Apartment, error) {
-	return nil, nil
-}
-
-func (listingsServer) DeleteApartment(context.Context, *listingsPB.DeleteApartmentRequest) (*listingsPB.DeleteApartmentResponse, error) {
-	return nil, nil
-}
-
-func (listingsServer) CreateBuilding(context.Context, *listingsPB.CreateBuildingRequest) (*listingsPB.Building, error) {
-	return nil, nil
-}
-
-func (listingsServer) GetBuilding(context.Context, *listingsPB.GetBuildingRequest) (*listingsPB.Building, error) {
-	return nil, nil
-}
-
-func (listingsServer) ListBuildings(context.Context, *listingsPB.ListBuildingRequest) (*listingsPB.ListBuildingResponse, error) {
-	return nil, nil
-}
-
-func (listingsServer) UpdateBuilding(context.Context, *listingsPB.UpdateBuildingRequest) (*listingsPB.Building, error) {
-	return nil, nil
-}
-
-func (listingsServer) DeleteBuilding(context.Context, *listingsPB.DeleteBuildingRequest) (*listingsPB.DeleteBuildingResponse, error) {
-	return nil, nil
-}
-
-func (listingsServer) CreateRealtor(context.Context, *listingsPB.CreateRealtorRequest) (*listingsPB.Realtor, error) {
-	return nil, nil
-}
-
-func (listingsServer) GetRealtor(context.Context, *listingsPB.GetRealtorRequest) (*listingsPB.Realtor, error) {
-	return nil, nil
-}
-
-func (listingsServer) ListRealtors(context.Context, *listingsPB.ListRealtorRequest) (*listingsPB.ListRealtorResponse, error) {
-	return nil, nil
-}
-
-func (listingsServer) UpdateRealtor(context.Context, *listingsPB.UpdateRealtorRequest) (*listingsPB.Realtor, error) {
-	return nil, nil
-}
-
-func (listingsServer) DeleteRealtor(context.Context, *listingsPB.DeleteRealtorRequest) (*listingsPB.DeleteRealtorResponse, error) {
-	return nil, nil
-}
-
-func (listingsServer) UploadPhoto(listingsPB.Listings_UploadPhotoServer) error {
-	return nil
-}
-
-func (listingsServer) StreamPhotos(listingsPB.Listings_StreamPhotosServer) error {
-	return nil
-}
-
-func (listingsServer) DeletePhoto(context.Context, *listingsPB.DeletePhotoRequest) (*listingsPB.DeletePhotoResponse, error) {
-	return nil, nil
+	}
 }
