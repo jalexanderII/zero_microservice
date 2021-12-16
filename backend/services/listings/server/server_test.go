@@ -4,13 +4,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/go-hclog"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	contentStore "github.com/jalexanderII/zero_microservice/backend/services/listings/store"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var store = contentStore.NewDiskImageStore("./store/tmp")
+var l = hclog.Default()
+var store = contentStore.NewDiskImageStore("./store/tmp", l)
 
 func Test_listingsServer_CreateRealtor(t *testing.T) {
 	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
@@ -18,7 +20,7 @@ func Test_listingsServer_CreateRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	in := &listingsPB.Realtor{
 		Id:          2,
@@ -43,7 +45,7 @@ func Test_listingsServer_CreateBuilding(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	in := &listingsPB.Building{
 		Id:           2,
@@ -77,7 +79,7 @@ func Test_listingsServer_CreateApartment(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	in := &listingsPB.Apartment{
 		Id:           1,
@@ -119,13 +121,13 @@ func Test_listingsServer_GetApartment(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	apartment, err := server.GetApartment(ctx, &listingsPB.GetApartmentRequest{Id: 1})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if apartment.Name != "example" {
+	if apartment.Id != 1 {
 		t.Errorf("2: Failed to fetch correct apartment: %+v", apartment)
 	}
 }
@@ -136,13 +138,13 @@ func Test_listingsServer_ListApartments(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	apartments, err := server.ListApartments(ctx, &listingsPB.ListApartmentRequest{})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if apartments.Apartments[0].Name != "example" {
+	if apartments.Apartments[0].Id != 1 {
 		t.Errorf("2: Failed to fetch apartments: %+v", apartments.Apartments[0])
 	}
 }
@@ -153,7 +155,7 @@ func Test_listingsServer_UpdateApartment(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 	in := &listingsPB.Apartment{
 		Id:           1,
 		Name:         "Updated",
@@ -194,7 +196,7 @@ func Test_listingsServer_DeleteApartment(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	in := &listingsPB.Apartment{
 		Id:           2,
@@ -248,7 +250,7 @@ func Test_listingsServer_GetBuilding(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	building, err := server.GetBuilding(ctx, &listingsPB.GetBuildingRequest{Id: 2})
 	if err != nil {
@@ -265,7 +267,7 @@ func Test_listingsServer_ListBuildings(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	buildings, err := server.ListBuildings(ctx, &listingsPB.ListBuildingRequest{})
 	if err != nil {
@@ -282,7 +284,7 @@ func Test_listingsServer_UpdateBuilding(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 	in := &listingsPB.Building{
 		Id:           1,
 		Name:         "Updated",
@@ -314,7 +316,7 @@ func Test_listingsServer_DeleteBuilding(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	in := &listingsPB.Building{
 		Id:           3,
@@ -359,7 +361,7 @@ func Test_listingsServer_GetRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	realtor, err := server.GetRealtor(ctx, &listingsPB.GetRealtorRequest{Id: 2})
 	if err != nil {
@@ -376,7 +378,7 @@ func Test_listingsServer_ListRealtors(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
 	if err != nil {
@@ -393,7 +395,7 @@ func Test_listingsServer_UpdateRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 	in := &listingsPB.Realtor{
 		Id:          1,
 		Name:        "Updated",
@@ -416,7 +418,7 @@ func Test_listingsServer_DeleteRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: store}
+	server := listingsServer{DB: listingDB, ContentStore: store, l: l}
 
 	in := &listingsPB.Realtor{
 		Id:          3,

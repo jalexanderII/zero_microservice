@@ -1,11 +1,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"log"
 	"net"
 
+	"github.com/hashicorp/go-hclog"
+	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/server"
 	contentStore "github.com/jalexanderII/zero_microservice/backend/services/listings/store"
@@ -14,30 +14,29 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var (
-	port = flag.Int("port", 9090, "The server port")
-)
-
 func main() {
-	log.Println("Listings Service")
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	l := hclog.Default()
+	l.Debug("Listings Service")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", config.SERVERPORT))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		l.Error("failed to listen", "error", err)
+		panic(err)
 	}
-	store := contentStore.NewDiskImageStore("./store/tmp")
+
+	store := contentStore.NewDiskImageStore("./store/tmp", l)
 	db, err := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
 
 	grpcServer := grpc.NewServer()
-	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, store))
+	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, store, l))
 
 	// register the reflection service which allows clients to determine the methods
 	// for this gRPC service
 	reflection.Register(grpcServer)
 
-	log.Printf("Server started at %v", lis.Addr().String())
+	l.Info("Server started", "port", lis.Addr().String())
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Printf("Oops... Server is not running! Reason: %v", err)
+		l.Error("Error starting server", "error", err)
 	}
 }
