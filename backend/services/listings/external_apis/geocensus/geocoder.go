@@ -71,7 +71,7 @@ type Coordinates struct {
 	Y float64 `json:"y"`
 }
 
-func GetGeoCode(street, city, state, zip string) (Coordinates, error) {
+func GetGeoCodeZip(street, city, state, zip string) (Coordinates, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), DefaultTimeout)
 	defer cancel()
 

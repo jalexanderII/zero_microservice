@@ -33,11 +33,11 @@ func NewListingsServer(db *listingsDB.ListingsDB, cs contentStore.ContentStore) 
 func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.CreateApartmentRequest) (*listingsPB.Apartment, error) {
 	var apartmentpb = in.Apartment
 
-	coords, err := geocensus.GetGeoCode(apartmentpb.Street, apartmentpb.City, apartmentpb.State, geocensus.FastStringConv(apartmentpb.ZipCode))
+	coords, err := geocensus.GetGeoCodeZip(apartmentpb.Street, apartmentpb.City, apartmentpb.State, geocensus.FastStringConv(apartmentpb.ZipCode))
 	if err != nil {
 		fmt.Printf("Could not fetch coordinates: %v\n", err)
 	}
-	
+
 	apartment, err := s.DB.CreateApartment(ctx, genDB.CreateApartmentParams{
 		ApartmentID:  apartmentpb.Id,
 		Name:         apartmentpb.Name,
