@@ -72,7 +72,7 @@ type Coordinates struct {
 }
 
 func GetGeoCodeZip(street, city, state, zip string) (Coordinates, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
 
 	url := fmt.Sprintf(
