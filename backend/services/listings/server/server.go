@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/external_apis/geocensus"
 	contentStore "github.com/jalexanderII/zero_microservice/backend/services/listings/store"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/grpc/codes"
@@ -30,6 +32,12 @@ func NewListingsServer(db *listingsDB.ListingsDB, cs contentStore.ContentStore) 
 
 func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.CreateApartmentRequest) (*listingsPB.Apartment, error) {
 	var apartmentpb = in.Apartment
+
+	coords, err := geocensus.GetGeoCode(apartmentpb.Street, apartmentpb.City, apartmentpb.State, geocensus.FastStringConv(apartmentpb.ZipCode))
+	if err != nil {
+		fmt.Printf("Could not fetch coordinates: %v\n", err)
+	}
+	
 	apartment, err := s.DB.CreateApartment(ctx, genDB.CreateApartmentParams{
 		ApartmentID:  apartmentpb.Id,
 		Name:         apartmentpb.Name,
@@ -40,8 +48,8 @@ func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.Crea
 		ZipCode:      apartmentpb.ZipCode,
 		Neighborhood: apartmentpb.Neighborhood,
 		Unit:         sql.NullString{String: apartmentpb.Unit, Valid: true},
-		Lat:          int32(apartmentpb.Lat),
-		Lng:          int32(apartmentpb.Lng),
+		Lat:          int32(coords.X),
+		Lng:          int32(coords.Y),
 		Rent:         apartmentpb.Rent,
 		Sqft:         sql.NullInt32{Int32: apartmentpb.Sqft, Valid: true},
 		Beds:         apartmentpb.Beds,

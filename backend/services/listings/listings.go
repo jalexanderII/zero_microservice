@@ -11,6 +11,7 @@ import (
 	contentStore "github.com/jalexanderII/zero_microservice/backend/services/listings/store"
 	"github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var (
@@ -27,12 +28,15 @@ func main() {
 	store := contentStore.NewDiskImageStore("./store/tmp")
 	db, err := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	var opts []grpc.ServerOption
 
-	grpcServer := grpc.NewServer(opts...)
+	grpcServer := grpc.NewServer()
 	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, store))
-	log.Printf("Server started at %v", lis.Addr().String())
 
+	// register the reflection service which allows clients to determine the methods
+	// for this gRPC service
+	reflection.Register(grpcServer)
+
+	log.Printf("Server started at %v", lis.Addr().String())
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Printf("Oops... Server is not running! Reason: %v", err)
 	}
