@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS apartments
     beds           integer      NOT NULL,
     baths          integer      NOT NULL,
     available_on   timestamp    NOT NULL DEFAULT NOW(),
+    created_at     timestamp    NOT NULL DEFAULT NOW(),
     days_on_market integer,
     description    text,
     amenities      text[],
