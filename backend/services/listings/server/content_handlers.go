@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 
+	config "github.com/jalexanderII/zero_microservice"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/grpc/codes"
@@ -77,8 +78,8 @@ func (s listingsServer) UploadContent(stream listingsPB.Listings_UploadContentSe
 		s.l.Info("received a chunk", "size", size)
 
 		contentSize += size
-		if contentSize > maxImageSize {
-			s.l.Error("[Error] image is too large", "content_size", contentSize, "max_size", maxImageSize)
+		if contentSize > config.MaxImageSize {
+			s.l.Error("[Error] image is too large", "content_size", contentSize, "max_size", config.MaxImageSize)
 			return fmt.Errorf("image is too large")
 		}
 

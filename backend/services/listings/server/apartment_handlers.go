@@ -6,6 +6,7 @@ import (
 
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/external_apis/geocensus"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/utils"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -15,7 +16,7 @@ func (s listingsServer) CreateApartment(ctx context.Context, in *listingsPB.Crea
 	var apartmentpb = in.Apartment
 
 	coords, err := geocensus.GetGeoCodeZip(
-		apartmentpb.Street, apartmentpb.City, apartmentpb.State, geocensus.FastStringConv(apartmentpb.ZipCode),
+		apartmentpb.Street, apartmentpb.City, apartmentpb.State, utils.FastStringConv(apartmentpb.ZipCode), false,
 	)
 	if err != nil {
 		s.l.Error("Could not fetch coordinates", "error", err)

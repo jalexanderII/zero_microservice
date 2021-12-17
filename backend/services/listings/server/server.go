@@ -11,8 +11,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const maxImageSize = 1 << 20
-
 type listingsServer struct {
 	listingsPB.UnimplementedListingsServer
 	DB           *listingsDB.ListingsDB

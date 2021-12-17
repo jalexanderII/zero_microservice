@@ -9,19 +9,21 @@ import (
 func TestGetGeoCode(t *testing.T) {
 	type args struct{ street, city, state, zip string }
 	tests := []struct {
-		name string
-		args args
-		want Coordinates
+		name    string
+		args    args
+		verbose bool
+		want    Coordinates
 	}{
 		{
-			name: "GetGeoCodeZip",
-			args: args{"22 Eldridge St", "New York", "NY", "10002"},
-			want: Coordinates{X: -73.993546, Y: 40.71506},
+			name:    "GetGeoCodeZip",
+			args:    args{"22 Eldridge St", "New York", "NY", "10002"},
+			verbose: false,
+			want:    Coordinates{X: -73.993546, Y: 40.71506},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetGeoCodeZip(tt.args.street, tt.args.city, tt.args.state, tt.args.zip)
+			got, err := GetGeoCodeZip(tt.args.street, tt.args.city, tt.args.state, tt.args.zip, tt.verbose)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
