@@ -6,6 +6,7 @@ import (
 
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/external_apis/geocensus"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/external_apis/google"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/utils"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -127,6 +128,30 @@ func (s listingsServer) DeleteApartment(ctx context.Context, in *listingsPB.Dele
 		return nil, err
 	}
 	return &listingsPB.DeleteApartmentResponse{Status: listingsPB.STATUS_SUCCESS, Apartment: ApartmentDBtoPB(apartment)}, nil
+}
+
+func (s listingsServer) GetNearbySchools(ctx context.Context, in *listingsPB.GetNearbySchoolsRequest) (*listingsPB.GetNearbySchoolsResponse, error) {
+	nearbySchools, err := google.GetNearbySchools(in.Lat, in.Lng, false)
+	if err != nil {
+		s.l.Error("[GooglePlacesAPI] Error fetching nearby schools", "error", err)
+		return nil, err
+	}
+	return &listingsPB.GetNearbySchoolsResponse{Results: nearbySchoolsToPB(nearbySchools.Results)}, nil
+}
+
+func nearbySchoolsToPB(results []google.PlacesResult) []*listingsPB.PlacesResult {
+	res := make([]*listingsPB.PlacesResult, len(results))
+	for idx, place := range results {
+		res[idx] = &listingsPB.PlacesResult{
+			FormattedAddress:  place.FormattedAddress,
+			Geometry:          &listingsPB.Coordinates{Lat: place.Geometry.Location.Lat, Lng: place.Geometry.Location.Lng},
+			Name:              place.Name,
+			Types:             place.Types,
+			PermanentlyClosed: place.PermanentlyClosed,
+			BusinessStatus:    place.BusinessStatus,
+		}
+	}
+	return res
 }
 
 func ApartmentDBtoPB(apartment genDB.Apartment) *listingsPB.Apartment {

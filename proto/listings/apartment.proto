@@ -62,3 +62,26 @@ message DeleteApartmentResponse {
   STATUS status = 1;
   Apartment apartment = 2;
 }
+
+message GetNearbySchoolsRequest {
+  double lat = 1;
+  double lng = 2;
+}
+
+message GetNearbySchoolsResponse{
+  repeated PlacesResult results = 1;
+}
+
+message PlacesResult {
+  string formatted_address = 1;
+  Coordinates geometry = 2;
+  string name = 3;
+  repeated string types = 4;
+  bool    permanently_closed = 5;
+  string    business_status = 6;
+}
+
+message Coordinates {
+  double lat = 1;
+  double lng = 2;
+}

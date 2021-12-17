@@ -15,6 +15,7 @@ service Listings {
   rpc ListApartments(ListApartmentRequest) returns (ListApartmentResponse);
   rpc UpdateApartment(UpdateApartmentRequest) returns (Apartment);
   rpc DeleteApartment(DeleteApartmentRequest) returns (DeleteApartmentResponse);
+  rpc GetNearbySchools(GetNearbySchoolsRequest) returns (GetNearbySchoolsResponse);
   // CRUD building functions
   rpc CreateBuilding(CreateBuildingRequest) returns (Building);
   rpc GetBuilding(GetBuildingRequest) returns (Building);
