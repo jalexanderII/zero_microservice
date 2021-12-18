@@ -9,7 +9,7 @@ import (
 	"time"
 
 	config "github.com/jalexanderII/zero_microservice"
-	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
+	database2 "github.com/jalexanderII/zero_microservice/backend/services/users/database"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,15 +28,15 @@ func NewServer(c mongo.Collection) *authServer {
 
 func (server authServer) Login(ctx context.Context, in *userPB.LoginRequest) (*userPB.AuthResponse, error) {
 	login, password := in.GetLogin(), in.GetPassword()
-	ctx, cancel := userDB.NewDBContext(5 * time.Second)
+	ctx, cancel := database2.NewDBContext(5 * time.Second)
 	defer cancel()
 
-	var user userDB.User
+	var user database2.User
 	err := server.userCollection.FindOne(ctx, bson.M{"$or": []bson.M{{"username": login}, {"email": login}}}).Decode(&user)
 	if err != nil {
 		return nil, fmt.Errorf("something went wrong: %v", err)
 	}
-	if user == userDB.NilUser || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+	if user == database2.NilUser || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
 		return nil, errors.New("wrong login credentials provided")
 	}
 	return &userPB.AuthResponse{Token: user.GetToken()}, nil
@@ -67,9 +67,9 @@ func (server authServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 	}
 
 	pw, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	newUser := userDB.User{ID: primitive.NewObjectID(), Email: email, Username: username, Password: string(pw)}
+	newUser := database2.User{ID: primitive.NewObjectID(), Email: email, Username: username, Password: string(pw)}
 
-	ctx, cancel := userDB.NewDBContext(5 * time.Second)
+	ctx, cancel := database2.NewDBContext(5 * time.Second)
 	defer cancel()
 	_, err = server.userCollection.InsertOne(ctx, newUser)
 	if err != nil {
@@ -81,30 +81,30 @@ func (server authServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 
 func (server authServer) EmailUsed(ctx context.Context, in *userPB.EmailUsedRequest) (*userPB.UsedResponse, error) {
 	var email = in.GetEmail()
-	ctx, cancel := userDB.NewDBContext(5 * time.Second)
+	ctx, cancel := database2.NewDBContext(5 * time.Second)
 	defer cancel()
-	var result userDB.User
+	var result database2.User
 	err := server.userCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 	if err != nil {
 		return nil, fmt.Errorf("something went wrong: %v", err)
 	}
-	return &userPB.UsedResponse{Used: result != userDB.NilUser}, nil
+	return &userPB.UsedResponse{Used: result != database2.NilUser}, nil
 }
 
 func (server authServer) UsernameUsed(ctx context.Context, in *userPB.UsernameUsedRequest) (*userPB.UsedResponse, error) {
 	var username = in.GetUsername()
-	ctx, cancel := userDB.NewDBContext(5 * time.Second)
+	ctx, cancel := database2.NewDBContext(5 * time.Second)
 	defer cancel()
-	var result userDB.User
+	var result database2.User
 	err := server.userCollection.FindOne(ctx, bson.M{"username": username}).Decode(&result)
 	if err != nil {
 		return nil, fmt.Errorf("something went wrong: %v", err)
 	}
-	return &userPB.UsedResponse{Used: result != userDB.NilUser}, nil
+	return &userPB.UsedResponse{Used: result != database2.NilUser}, nil
 }
 
 func (server authServer) AuthUser(_ context.Context, in *userPB.AuthUserRequest) (*userPB.AuthUserResponse, error) {
 	var token = in.GetToken()
-	user := userDB.UserFromToken(token)
+	user := database2.UserFromToken(token)
 	return &userPB.AuthUserResponse{ID: user.ID.Hex(), Username: user.Username, Email: user.Email}, nil
 }

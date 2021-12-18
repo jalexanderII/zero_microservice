@@ -92,7 +92,7 @@ func (s listingsServer) UploadContent(stream listingsPB.Listings_UploadContentSe
 
 	contentID, contentInfo, err := s.ContentStore.Save(sourceID, contentType, contentData)
 	if err != nil {
-		s.l.Error("[Error] cannot save content to the store", "error", err)
+		s.l.Error("[Error] cannot save content to the Store", "error", err)
 		return err
 	}
 

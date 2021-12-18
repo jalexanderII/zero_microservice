@@ -5,19 +5,19 @@ import (
 	"testing"
 
 	config "github.com/jalexanderII/zero_microservice"
-	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
+	database2 "github.com/jalexanderII/zero_microservice/backend/services/users/database"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Test_authServer_Login(t *testing.T) {
-	db := userDB.ConnectToTestDB()
+	db := database2.ConnectToTestDB()
 	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
 	server := authServer{userCollection: userCollection}
 
 	pw, _ := bcrypt.GenerateFromPassword([]byte("example"), bcrypt.DefaultCost)
-	_, err := db.Collection("user").InsertOne(context.Background(), userDB.User{ID: primitive.NewObjectID(), Email: "test@gmail.com", Username: "Carl", Password: string(pw)})
+	_, err := db.Collection("user").InsertOne(context.Background(), database2.User{ID: primitive.NewObjectID(), Email: "test@gmail.com", Username: "Carl", Password: string(pw)})
 	if err != nil {
 		t.Errorf("Something went wrong: %v", err)
 	}
@@ -39,11 +39,11 @@ func Test_authServer_Login(t *testing.T) {
 }
 
 func Test_authServer_UsernameUsed(t *testing.T) {
-	db := userDB.ConnectToTestDB()
+	db := database2.ConnectToTestDB()
 	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
 	server := authServer{userCollection: userCollection}
 
-	_, err := db.Collection("user").InsertOne(context.Background(), userDB.User{Username: "Carl"})
+	_, err := db.Collection("user").InsertOne(context.Background(), database2.User{Username: "Carl"})
 	if err != nil {
 		t.Errorf("Something went wrong: %v", err)
 	}
@@ -65,11 +65,11 @@ func Test_authServer_UsernameUsed(t *testing.T) {
 }
 
 func Test_authServer_EmailUsed(t *testing.T) {
-	db := userDB.ConnectToTestDB()
+	db := database2.ConnectToTestDB()
 	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
 	server := authServer{userCollection: userCollection}
 
-	_, err := db.Collection("user").InsertOne(context.Background(), userDB.User{Email: "test@gmail.com"})
+	_, err := db.Collection("user").InsertOne(context.Background(), database2.User{Email: "test@gmail.com"})
 	if err != nil {
 		t.Errorf("Something went wrong: %v", err)
 	}
@@ -91,11 +91,11 @@ func Test_authServer_EmailUsed(t *testing.T) {
 }
 
 func Test_authServer_SignUp(t *testing.T) {
-	db := userDB.ConnectToTestDB()
+	db := database2.ConnectToTestDB()
 	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
 	server := authServer{userCollection: userCollection}
 
-	_, err := db.Collection("user").InsertOne(context.Background(), userDB.User{Username: "Carl", Email: "test@gmail.com"})
+	_, err := db.Collection("user").InsertOne(context.Background(), database2.User{Username: "Carl", Email: "test@gmail.com"})
 	if err != nil {
 		t.Errorf("Something went wrong: %v", err)
 	}
@@ -121,7 +121,7 @@ func Test_authServer_SignUp(t *testing.T) {
 }
 
 func Test_authServer_AuthUser(t *testing.T) {
-	db := userDB.ConnectToTestDB()
+	db := database2.ConnectToTestDB()
 	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
 	server := authServer{userCollection: userCollection}
 
