@@ -276,10 +276,10 @@ proto.listings.UploadContentRequest.prototype.hasInfo = function() {
 
 /**
  * optional bytes chunk_data = 2;
- * @return {!(string|Uint8Array)}
+ * @return {string}
  */
 proto.listings.UploadContentRequest.prototype.getChunkData = function() {
-  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
