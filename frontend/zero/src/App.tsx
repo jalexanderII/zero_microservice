@@ -1,9 +1,11 @@
 import * as grpcWeb from 'grpc-web';
-import React from 'react';
+import * as React from 'react';
 import './App.css';
-// Import the client and the message definition
 import { ListingsClient } from './proto/ListingsServiceClientPb';
 import { GetApartmentRequest, Apartment } from './proto/apartment_pb';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { RouteLinks } from './routes'; 
+
 
 function App() {
   var echoService = new ListingsClient('http://localhost:8080');
@@ -29,8 +31,9 @@ function App() {
   });
   
   return (
-    <div className="App">
-    </div>
+    <Router>
+      <RouteLinks />
+    </Router>
   );
 }
 
