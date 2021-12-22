@@ -4,14 +4,15 @@ import './App.css';
 import { GetApartmentRequest, ListApartmentRequest } from './proto/apartment_pb'
 import { ListingsClient } from './proto/listings_grpc_web_pb'
 import { ErrorBoundary } from './ErrorBoundary'
+import { FeedbackForm } from './form'
 
 const srv = new ListingsClient("http://localhost:8080")
 
 class App extends Component {
 
   state = {
-    response: null,
-    listResult: []
+    resp: null,
+    listResult: [],
   }
 
   GA = () => {
@@ -51,10 +52,11 @@ class App extends Component {
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
+            <FeedbackForm />
             <button onClick={this.GA}>Get Apartment</button>
               <div>Apartmnet:{this.state.fullAddress} with rent of {this.state.rent}</div>
             <button onClick={this.LA}>Apartment List</button>
-              {this.state.listResult.map(i => (<div>{i.getFullAddress()} costs: {i.getRent()}</div>))}
+            {this.state.listResult.map(i => (<li key="{i.getId()}">{i.getFullAddress()} costs: {i.getRent()}</li>))}
         </header>
       </div>
       </ErrorBoundary >
