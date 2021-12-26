@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package application;
+option go_package = "./proto;application";
+
+import "application_request.proto";
+import "application_response.proto";
+
+service Application {
+  rpc Apply(ApplicationRequest) returns (ApplicationResponse);
+
+  // CRUD application request functions
+  rpc CreateApplication(CreateApplicationRequest) returns (ApplicationRequest);
+  rpc GetApplication(GetApplicationRequest) returns (ApplicationRequest);
+  rpc ListApplications(ListApplicationRequest) returns (ListApplicationRequestResponse);
+  rpc UpdateApplication(UpdateApplicationRequest) returns (ApplicationRequest);
+  rpc DeleteApplication(DeleteApplicationRequest) returns (DeleteApplicationRequestResponse);
+  // CRUD application response functions
+  rpc CreateResponse(CreateApplicationResponse) returns (ApplicationResponse);
+  rpc GetResponse(GetApplicationResponse) returns (ApplicationResponse);
+  rpc ListResponses(ListApplicationResponse) returns (ListApplicationResponseResponse);
+  rpc UpdateResponse(UpdateApplicationResponse) returns (ApplicationResponse);
+  rpc DeleteResponse(DeleteApplicationResponse) returns (DeleteApplicationResponseResponse);
+}

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package application;
+option go_package = "./proto;application";
+
+import "types.proto";
+import "google/protobuf/field_mask.proto";
+
+message ApplicationRequest {
+  int32 id = 1;
+  string name = 2;
+  int32 user_ref = 3;
+  string social_security = 4;
+  string date_of_birth = 5;
+  string drivers_license = 6;
+  string previous_address = 7;
+  string previous_landlord = 8;
+  string previous_landlord_number = 9;
+  string employer = 10;
+  int32 salary = 11;
+  int32 apartment_ref = 12;
+}
+
+// Service Methods
+message CreateApplicationRequest {
+  ApplicationRequest application = 1;
+}
+
+message GetApplicationRequest {
+  int32 id = 1;
+}
+
+message UpdateApplicationRequest {
+  int32 id = 1;
+  ApplicationRequest application = 2;
+  google.protobuf.FieldMask mask = 3;
+}
+
+message DeleteApplicationRequest {
+  int32 id = 1;
+}
+
+message ListApplicationRequest {}
+
+message ListApplicationRequestResponse {
+  repeated ApplicationRequest applications = 1;
+}
+
+message DeleteApplicationRequestResponse {
+  STATUS status = 1;
+  ApplicationRequest application = 2;
+}

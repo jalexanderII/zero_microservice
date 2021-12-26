@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package application;
+option go_package = "./proto;application";
+
+import "types.proto";
+import "google/protobuf/field_mask.proto";
+
+message ApplicationResponse {
+  int32 id = 1;
+  UUID reference_id = 2;
+  string status = 3;
+  repeated string attachments = 4;
+  int32 application_ref = 5;
+}
+
+// Service Methods
+message CreateApplicationResponse {
+  ApplicationResponse application = 1;
+}
+
+message GetApplicationResponse {
+  int32 id = 1;
+}
+
+message UpdateApplicationResponse {
+  int32 id = 1;
+  ApplicationResponse application = 2;
+  google.protobuf.FieldMask mask = 3;
+}
+
+message DeleteApplicationResponse {
+  int32 id = 1;
+}
+
+message ListApplicationResponse{}
+
+message ListApplicationResponseResponse {
+  repeated ApplicationResponse applications = 1;
+}
+
+message DeleteApplicationResponseResponse {
+  STATUS status = 1;
+  ApplicationResponse application = 2;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package application;
+option go_package = "./proto;application";
+
+message UUID {
+  string value = 1;
+}
+
+enum STATUS {
+  STATUS_UNKNOWN = 0;
+  SUCCESS = 1;
+  FAIL = 2;
+}

@@ -13,6 +13,15 @@
         <ImportPathEntry>
           <option name="location" value="file://$PROJECT_DIR$/proto/listings" />
         </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/proto/application" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/proto/lifecycle" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/proto/users" />
+        </ImportPathEntry>
       </list>
     </option>
     <option name="descriptorPath" value="google/protobuf/descriptor.proto" />

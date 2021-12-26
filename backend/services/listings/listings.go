@@ -23,7 +23,7 @@ func main() {
 	l := hclog.Default()
 	l.Debug("Listings Service")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", config.LISTINGSPORT))
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", config.SERVERPORT))
 	if err != nil {
 		l.Error("failed to listen", "error", err)
 		panic(err)
