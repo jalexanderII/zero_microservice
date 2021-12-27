@@ -21,7 +21,8 @@ INSERT INTO applications (name,
                           employer,
                           salary,
                           user_id,
-                          apartment_id)
+                          apartment_id,
+                          attachments)
 VALUES ($1,
         $2,
         $3,
@@ -32,8 +33,9 @@ VALUES ($1,
         $8,
         $9,
         $10,
-        $11)
-RETURNING application_request_id, name, social_security, date_of_birth, drivers_license, previous_address, previous_landlord, previous_landlord_number, employer, salary, created_at, user_id, apartment_id
+        $11,
+        $12)
+RETURNING application_request_id, name, social_security, date_of_birth, drivers_license, previous_address, previous_landlord, previous_landlord_number, employer, salary, created_at, user_id, apartment_id, attachments
 `
 
 type CreateApplicationRequestParams struct {
@@ -48,6 +50,7 @@ type CreateApplicationRequestParams struct {
 	Salary                 int32          `json:"salary"`
 	UserID                 int32          `json:"user_id"`
 	ApartmentID            int32          `json:"apartment_id"`
+	Attachments            []string       `json:"attachments"`
 }
 
 func (q *Queries) CreateApplicationRequest(ctx context.Context, arg CreateApplicationRequestParams) (Application, error) {
@@ -63,6 +66,7 @@ func (q *Queries) CreateApplicationRequest(ctx context.Context, arg CreateApplic
 		arg.Salary,
 		arg.UserID,
 		arg.ApartmentID,
+		pq.Array(arg.Attachments),
 	)
 	var i Application
 	err := row.Scan(
@@ -79,34 +83,31 @@ func (q *Queries) CreateApplicationRequest(ctx context.Context, arg CreateApplic
 		&i.CreatedAt,
 		&i.UserID,
 		&i.ApartmentID,
+		pq.Array(&i.Attachments),
 	)
 	return i, err
 }
 
 const createApplicationResponse = `-- name: CreateApplicationResponse :one
 INSERT INTO application_response (status,
-                                  attachments,
                                   application_id)
 VALUES ($1,
-        $2,
-        $3)
-RETURNING application_response_id, reference_id, status, attachments, application_id
+        $2)
+RETURNING application_response_id, reference_id, status, application_id
 `
 
 type CreateApplicationResponseParams struct {
 	Status        ApplicationStatus `json:"status"`
-	Attachments   []string          `json:"attachments"`
 	ApplicationID int32             `json:"application_id"`
 }
 
 func (q *Queries) CreateApplicationResponse(ctx context.Context, arg CreateApplicationResponseParams) (ApplicationResponse, error) {
-	row := q.db.QueryRowContext(ctx, createApplicationResponse, arg.Status, pq.Array(arg.Attachments), arg.ApplicationID)
+	row := q.db.QueryRowContext(ctx, createApplicationResponse, arg.Status, arg.ApplicationID)
 	var i ApplicationResponse
 	err := row.Scan(
 		&i.ApplicationResponseID,
 		&i.ReferenceID,
 		&i.Status,
-		pq.Array(&i.Attachments),
 		&i.ApplicationID,
 	)
 	return i, err
@@ -135,7 +136,7 @@ func (q *Queries) DeleteApplicationResponse(ctx context.Context, applicationResp
 }
 
 const getApplicationRequest = `-- name: GetApplicationRequest :one
-SELECT application_request_id, name, social_security, date_of_birth, drivers_license, previous_address, previous_landlord, previous_landlord_number, employer, salary, created_at, user_id, apartment_id
+SELECT application_request_id, name, social_security, date_of_birth, drivers_license, previous_address, previous_landlord, previous_landlord_number, employer, salary, created_at, user_id, apartment_id, attachments
 FROM applications
 WHERE application_request_id = $1
 `
@@ -157,12 +158,13 @@ func (q *Queries) GetApplicationRequest(ctx context.Context, applicationRequestI
 		&i.CreatedAt,
 		&i.UserID,
 		&i.ApartmentID,
+		pq.Array(&i.Attachments),
 	)
 	return i, err
 }
 
 const getApplicationResponse = `-- name: GetApplicationResponse :one
-SELECT application_response_id, reference_id, status, attachments, application_id
+SELECT application_response_id, reference_id, status, application_id
 FROM application_response
 WHERE application_response_id = $1
 `
@@ -174,14 +176,13 @@ func (q *Queries) GetApplicationResponse(ctx context.Context, applicationRespons
 		&i.ApplicationResponseID,
 		&i.ReferenceID,
 		&i.Status,
-		pq.Array(&i.Attachments),
 		&i.ApplicationID,
 	)
 	return i, err
 }
 
 const listApplicationRequest = `-- name: ListApplicationRequest :many
-SELECT application_request_id, name, social_security, date_of_birth, drivers_license, previous_address, previous_landlord, previous_landlord_number, employer, salary, created_at, user_id, apartment_id
+SELECT application_request_id, name, social_security, date_of_birth, drivers_license, previous_address, previous_landlord, previous_landlord_number, employer, salary, created_at, user_id, apartment_id, attachments
 FROM applications
 ORDER BY application_request_id
 `
@@ -209,6 +210,7 @@ func (q *Queries) ListApplicationRequest(ctx context.Context) ([]Application, er
 			&i.CreatedAt,
 			&i.UserID,
 			&i.ApartmentID,
+			pq.Array(&i.Attachments),
 		); err != nil {
 			return nil, err
 		}
@@ -224,7 +226,7 @@ func (q *Queries) ListApplicationRequest(ctx context.Context) ([]Application, er
 }
 
 const listApplicationResponse = `-- name: ListApplicationResponse :many
-SELECT application_response_id, reference_id, status, attachments, application_id
+SELECT application_response_id, reference_id, status, application_id
 FROM application_response
 ORDER BY application_response_id
 `
@@ -242,7 +244,6 @@ func (q *Queries) ListApplicationResponse(ctx context.Context) ([]ApplicationRes
 			&i.ApplicationResponseID,
 			&i.ReferenceID,
 			&i.Status,
-			pq.Array(&i.Attachments),
 			&i.ApplicationID,
 		); err != nil {
 			return nil, err
@@ -265,7 +266,8 @@ SET name                    = $2,
     previous_landlord=$4,
     previous_landlord_number=$5,
     employer=$6,
-    salary=$7
+    salary=$7,
+    attachments=$8
 WHERE application_request_id = $1
 `
 
@@ -277,6 +279,7 @@ type UpdateApplicationRequestParams struct {
 	PreviousLandlordNumber sql.NullString `json:"previous_landlord_number"`
 	Employer               sql.NullString `json:"employer"`
 	Salary                 int32          `json:"salary"`
+	Attachments            []string       `json:"attachments"`
 }
 
 func (q *Queries) UpdateApplicationRequest(ctx context.Context, arg UpdateApplicationRequestParams) error {
@@ -288,24 +291,39 @@ func (q *Queries) UpdateApplicationRequest(ctx context.Context, arg UpdateApplic
 		arg.PreviousLandlordNumber,
 		arg.Employer,
 		arg.Salary,
+		pq.Array(arg.Attachments),
 	)
 	return err
 }
 
 const updateApplicationResponse = `-- name: UpdateApplicationResponse :exec
 UPDATE application_response
-SET status      = $2,
-    attachments = $3
+SET status = $2
 WHERE application_response_id = $1
 `
 
 type UpdateApplicationResponseParams struct {
 	ApplicationResponseID int32             `json:"application_response_id"`
 	Status                ApplicationStatus `json:"status"`
-	Attachments           []string          `json:"attachments"`
 }
 
 func (q *Queries) UpdateApplicationResponse(ctx context.Context, arg UpdateApplicationResponseParams) error {
-	_, err := q.db.ExecContext(ctx, updateApplicationResponse, arg.ApplicationResponseID, arg.Status, pq.Array(arg.Attachments))
+	_, err := q.db.ExecContext(ctx, updateApplicationResponse, arg.ApplicationResponseID, arg.Status)
+	return err
+}
+
+const updateAttachments = `-- name: UpdateAttachments :exec
+UPDATE applications
+SET attachments = $2
+WHERE application_request_id = $1
+`
+
+type UpdateAttachmentsParams struct {
+	ApplicationRequestID int32    `json:"application_request_id"`
+	Attachments          []string `json:"attachments"`
+}
+
+func (q *Queries) UpdateAttachments(ctx context.Context, arg UpdateAttachmentsParams) error {
+	_, err := q.db.ExecContext(ctx, updateAttachments, arg.ApplicationRequestID, pq.Array(arg.Attachments))
 	return err
 }

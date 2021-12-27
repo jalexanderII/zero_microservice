@@ -67,6 +67,7 @@ func (s applicationServer) UpdateApplication(ctx context.Context, in *applicatio
 		PreviousLandlordNumber: sql.NullString{String: applicationpb.PreviousLandlordNumber, Valid: true},
 		Employer:               sql.NullString{String: applicationpb.Employer, Valid: true},
 		Salary:                 applicationpb.Salary,
+		Attachments:            applicationpb.Attachments,
 	})
 	if err != nil {
 		s.l.Error("[DB] Error updating application", "error", err)

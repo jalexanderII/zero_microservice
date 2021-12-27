@@ -8,16 +8,18 @@ import (
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/application/database/genDB"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
+	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 )
 
 type applicationServer struct {
 	applicationPB.UnimplementedApplicationServer
-	DB *applicationDB.ApplicationDB
-	l  hclog.Logger
+	DB                *applicationDB.ApplicationDB
+	FileServiceClient fileServicePB.FileServiceClient
+	l                 hclog.Logger
 }
 
-func NewApplicationServer(db *applicationDB.ApplicationDB, l hclog.Logger) *applicationServer {
-	return &applicationServer{DB: db, l: l}
+func NewApplicationServer(db *applicationDB.ApplicationDB, f fileServicePB.FileServiceClient, l hclog.Logger) *applicationServer {
+	return &applicationServer{DB: db, FileServiceClient: f, l: l}
 }
 
 func (s applicationServer) Apply(ctx context.Context, in *applicationPB.ApplicationRequest) (*applicationPB.ApplicationResponse, error) {
@@ -31,7 +33,6 @@ func (s applicationServer) Apply(ctx context.Context, in *applicationPB.Applicat
 	ar := &applicationPB.ApplicationResponse{
 		ReferenceId:    &applicationPB.UUID{Value: uuid.NewString()},
 		Status:         string(genDB.ApplicationStatusPENDING),
-		Attachments:    []string{},
 		ApplicationRef: application.Id,
 	}
 
@@ -42,4 +43,36 @@ func (s applicationServer) Apply(ctx context.Context, in *applicationPB.Applicat
 	}
 
 	return response, nil
+}
+
+func (s applicationServer) Upload(ctx context.Context, in *applicationPB.FileUploadRequest) (*applicationPB.FileUploadResponse, error) {
+	s.l.Debug("Upload")
+	md := &fileServicePB.MetaData{
+		Name:          in.GetMetadata().GetName(),
+		SourceId:      in.GetMetadata().GetSourceId(),
+		ContentType:   fileServicePB.ContentType(in.GetMetadata().GetContentType()),
+		ContentSource: in.GetMetadata().GetName(),
+	}
+
+	upload, err := s.FileServiceClient.Upload(ctx, &fileServicePB.FileUploadRequest{Metadata: md, FilePath: in.GetFilePath()})
+	if err != nil {
+		s.l.Error("[FileServiceClient] Error uploading content", "error", err)
+		return nil, err
+	}
+
+	application, err := s.GetApplication(ctx, &applicationPB.GetApplicationRequest{Id: md.SourceId})
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.DB.UpdateAttachments(ctx, genDB.UpdateAttachmentsParams{
+		ApplicationRequestID: md.SourceId,
+		Attachments:          append(application.Attachments, md.Name),
+	})
+	if err != nil {
+		s.l.Error("[DB] Error updating application", "error", err)
+		return nil, err
+	}
+
+	return &applicationPB.FileUploadResponse{Name: upload.GetName(), Status: applicationPB.STATUS(upload.Status)}, nil
 }

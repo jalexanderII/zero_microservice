@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS applications
     salary                   integer      NOT NULL,
     created_at               timestamp    NOT NULL DEFAULT NOW(),
     user_id                  integer      NOT NULL,
-    apartment_id             integer      NOT NULL
+    apartment_id             integer      NOT NULL,
+    attachments              text[]
 );
 
 CREATE INDEX applications_name_idx ON applications (name);
@@ -31,7 +32,6 @@ CREATE TABLE IF NOT EXISTS application_response
     application_response_id SERIAL PRIMARY KEY,
     reference_id            uuid DEFAULT uuid_generate_v4(),
     status                  application_status NOT NULL,
-    attachments             text[],
     application_id          integer            NOT NULL REFERENCES applications (application_request_id)
 );
 

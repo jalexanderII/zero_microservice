@@ -5,10 +5,10 @@ option go_package = "./proto;application";
 
 import "application_request.proto";
 import "application_response.proto";
+import "types.proto";
 
 service Application {
   rpc Apply(ApplicationRequest) returns (ApplicationResponse);
-
   // CRUD application request functions
   rpc CreateApplication(CreateApplicationRequest) returns (ApplicationRequest);
   rpc GetApplication(GetApplicationRequest) returns (ApplicationRequest);
@@ -21,4 +21,6 @@ service Application {
   rpc ListResponses(ListApplicationResponse) returns (ListApplicationResponseResponse);
   rpc UpdateResponse(UpdateApplicationResponse) returns (ApplicationResponse);
   rpc DeleteResponse(DeleteApplicationResponse) returns (DeleteApplicationResponseResponse);
+  // Call to FileService to upload documents
+  rpc Upload(FileUploadRequest) returns (FileUploadResponse);
 }

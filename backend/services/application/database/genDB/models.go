@@ -45,12 +45,12 @@ type Application struct {
 	CreatedAt              time.Time      `json:"created_at"`
 	UserID                 int32          `json:"user_id"`
 	ApartmentID            int32          `json:"apartment_id"`
+	Attachments            []string       `json:"attachments"`
 }
 
 type ApplicationResponse struct {
 	ApplicationResponseID int32             `json:"application_response_id"`
 	ReferenceID           uuid.NullUUID     `json:"reference_id"`
 	Status                ApplicationStatus `json:"status"`
-	Attachments           []string          `json:"attachments"`
 	ApplicationID         int32             `json:"application_id"`
 }

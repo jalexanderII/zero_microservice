@@ -9,7 +9,8 @@ INSERT INTO applications (name,
                           employer,
                           salary,
                           user_id,
-                          apartment_id)
+                          apartment_id,
+                          attachments)
 VALUES ($1,
         $2,
         $3,
@@ -20,7 +21,8 @@ VALUES ($1,
         $8,
         $9,
         $10,
-        $11)
+        $11,
+        $12)
 RETURNING *;
 
 -- name: GetApplicationRequest :one
@@ -40,7 +42,13 @@ SET name                    = $2,
     previous_landlord=$4,
     previous_landlord_number=$5,
     employer=$6,
-    salary=$7
+    salary=$7,
+    attachments=$8
+WHERE application_request_id = $1;
+
+-- name: UpdateAttachments :exec
+UPDATE applications
+SET attachments = $2
 WHERE application_request_id = $1;
 
 -- name: DeleteApplicationRequest :exec
@@ -50,11 +58,9 @@ WHERE application_request_id = $1;
 
 -- name: CreateApplicationResponse :one
 INSERT INTO application_response (status,
-                                  attachments,
                                   application_id)
 VALUES ($1,
-        $2,
-        $3)
+        $2)
 RETURNING *;
 
 -- name: GetApplicationResponse :one
@@ -69,8 +75,7 @@ ORDER BY application_response_id;
 
 -- name: UpdateApplicationResponse :exec
 UPDATE application_response
-SET status      = $2,
-    attachments = $3
+SET status = $2
 WHERE application_response_id = $1;
 
 -- name: DeleteApplicationResponse :exec

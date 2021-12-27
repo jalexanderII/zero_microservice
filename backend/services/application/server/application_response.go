@@ -13,7 +13,6 @@ func (s applicationServer) CreateResponse(ctx context.Context, in *applicationPB
 
 	application, err := s.DB.CreateApplicationResponse(ctx, genDB.CreateApplicationResponseParams{
 		Status:        genDB.ApplicationStatus(applicationResponsepb.Status),
-		Attachments:   applicationResponsepb.Attachments,
 		ApplicationID: applicationResponsepb.ApplicationRef,
 	})
 	if err != nil {
@@ -53,7 +52,6 @@ func (s applicationServer) UpdateResponse(ctx context.Context, in *applicationPB
 	err := s.DB.UpdateApplicationResponse(ctx, genDB.UpdateApplicationResponseParams{
 		ApplicationResponseID: in.Id,
 		Status:                genDB.ApplicationStatus(applicationResponsepb.Status),
-		Attachments:           applicationResponsepb.Attachments,
 	})
 	if err != nil {
 		s.l.Error("[DB] Error updating application", "error", err)
@@ -83,7 +81,6 @@ func ResponseDBtoPB(applicationResponse genDB.ApplicationResponse) *applicationP
 		Id:             applicationResponse.ApplicationResponseID,
 		ReferenceId:    &applicationPB.UUID{Value: applicationResponse.ReferenceID.UUID.String()},
 		Status:         string(applicationResponse.Status),
-		Attachments:    applicationResponse.Attachments,
 		ApplicationRef: applicationResponse.ApplicationID,
 	}
 }

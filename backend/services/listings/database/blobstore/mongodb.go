@@ -38,7 +38,7 @@ func UploadFile(file string) {
 	}
 	conn := InitiateMongoClient()
 	bucket, err := gridfs.NewBucket(
-		conn.Database(config.LISTINGSBLOBDB),
+		conn.Database(config.CONTENTDBNAME),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +64,7 @@ func DownloadFile(fileName string) {
 	conn := InitiateMongoClient()
 
 	// For CRUD operations, here is an example
-	db := conn.Database(config.LISTINGSBLOBDB)
+	db := conn.Database(config.CONTENTDBNAME)
 	fsFiles := db.Collection("fs.files")
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	var results bson.M

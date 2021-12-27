@@ -16,13 +16,12 @@ func Test_applicationServer_CreateResponse(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	in := &applicationPB.ApplicationResponse{
 		Id:             1,
 		ReferenceId:    &applicationPB.UUID{Value: uuid.NewString()},
 		Status:         string(genDB.ApplicationStatusAPPROVED),
-		Attachments:    []string{"example"},
 		ApplicationRef: 1,
 	}
 	application, err := server.CreateResponse(ctx, &applicationPB.CreateApplicationResponse{Application: in})
@@ -40,7 +39,7 @@ func Test_applicationServer_GetResponse(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	application, err := server.GetResponse(ctx, &applicationPB.GetApplicationResponse{Id: 1})
 	if err != nil {
@@ -57,7 +56,7 @@ func Test_applicationServer_ListResponses(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	applications, err := server.ListResponses(ctx, &applicationPB.ListApplicationResponse{})
 	if err != nil {
@@ -74,11 +73,10 @@ func Test_applicationServer_UpdateResponse(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 	in := &applicationPB.ApplicationResponse{
-		Id:          1,
-		Status:      string(genDB.ApplicationStatusPENDING),
-		Attachments: []string{"Updated"},
+		Id:     1,
+		Status: string(genDB.ApplicationStatusPENDING),
 	}
 	application, err := server.UpdateResponse(ctx, &applicationPB.UpdateApplicationResponse{Id: 1, Application: in})
 	if err != nil {
@@ -95,13 +93,12 @@ func Test_applicationServer_DeleteResponse(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	in := &applicationPB.ApplicationResponse{
 		Id:             2,
 		ReferenceId:    &applicationPB.UUID{Value: uuid.NewString()},
 		Status:         string(genDB.ApplicationStatusAPPROVED),
-		Attachments:    []string{"to_delete"},
 		ApplicationRef: 1,
 	}
 	application, err := server.CreateResponse(ctx, &applicationPB.CreateApplicationResponse{Application: in})

@@ -10,7 +10,7 @@ require (
 	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/lib/pq v1.10.4
 	github.com/stretchr/testify v1.7.0
-	go.mongodb.org/mongo-driver v1.7.0
+	go.mongodb.org/mongo-driver v1.8.1
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.0.0-20211013171255-e13a2654a71e
 	google.golang.org/grpc v1.42.0

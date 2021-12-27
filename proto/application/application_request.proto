@@ -19,6 +19,7 @@ message ApplicationRequest {
   string employer = 10;
   int32 salary = 11;
   int32 apartment_ref = 12;
+  repeated string attachments = 13;
 }
 
 // Service Methods

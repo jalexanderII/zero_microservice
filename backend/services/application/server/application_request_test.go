@@ -14,10 +14,9 @@ func Test_applicationServer_CreateApplication(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	in := &applicationPB.ApplicationRequest{
-		Id:                     1,
 		Name:                   "example",
 		SocialSecurity:         "example",
 		DateOfBirth:            "11/19/1990",
@@ -29,12 +28,13 @@ func Test_applicationServer_CreateApplication(t *testing.T) {
 		Salary:                 150000,
 		UserRef:                1,
 		ApartmentRef:           1,
+		Attachments:            []string{"example"},
 	}
 	application, err := server.CreateApplication(ctx, &applicationPB.CreateApplicationRequest{Application: in})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if application.Id != in.Id {
+	if application.Name != in.Name {
 		t.Errorf("2: Failed to create new application: %+v", application)
 	}
 }
@@ -45,7 +45,7 @@ func Test_applicationServer_GetApplication(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	application, err := server.GetApplication(ctx, &applicationPB.GetApplicationRequest{Id: 1})
 	if err != nil {
@@ -62,7 +62,7 @@ func Test_applicationServer_ListApplications(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	applications, err := server.ListApplications(ctx, &applicationPB.ListApplicationRequest{})
 	if err != nil {
@@ -79,7 +79,7 @@ func Test_applicationServer_UpdateApplication(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 	in := &applicationPB.ApplicationRequest{
 		Name:                   "Updated",
 		PreviousAddress:        "Updated",
@@ -87,6 +87,7 @@ func Test_applicationServer_UpdateApplication(t *testing.T) {
 		PreviousLandlordNumber: "Updated",
 		Employer:               "Updated",
 		Salary:                 175000,
+		Attachments:            []string{"example", "Updated"},
 	}
 	application, err := server.UpdateApplication(ctx, &applicationPB.UpdateApplicationRequest{Id: 1, Application: in})
 	if err != nil {
@@ -103,7 +104,7 @@ func Test_applicationServer_DeleteApplication(t *testing.T) {
 
 	db, _ := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
-	server := applicationServer{DB: appDB, l: L}
+	server := applicationServer{DB: appDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	in := &applicationPB.ApplicationRequest{
 		Id:                     2,
@@ -118,6 +119,7 @@ func Test_applicationServer_DeleteApplication(t *testing.T) {
 		Salary:                 150000,
 		UserRef:                1,
 		ApartmentRef:           1,
+		Attachments:            []string{"to_delete"},
 	}
 	application, err := server.CreateApplication(ctx, &applicationPB.CreateApplicationRequest{Application: in})
 	if err != nil {
