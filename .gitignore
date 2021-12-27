@@ -24,3 +24,8 @@ Makefile
 # IDE
 .idea
 
+# test data store
+/backend/services/file_service/downloads/
+
+# DB
+.DS_Store
