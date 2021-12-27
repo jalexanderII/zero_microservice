@@ -4,12 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/go-hclog"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 )
-
-var L = hclog.Default()
 
 func Test_applicationServer_CreateApplication(t *testing.T) {
 	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
