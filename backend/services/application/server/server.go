@@ -51,7 +51,7 @@ func (s applicationServer) Upload(ctx context.Context, in *applicationPB.FileUpl
 		Name:          in.GetMetadata().GetName(),
 		SourceId:      in.GetMetadata().GetSourceId(),
 		ContentType:   fileServicePB.ContentType(in.GetMetadata().GetContentType()),
-		ContentSource: in.GetMetadata().GetName(),
+		ContentSource: in.GetMetadata().GetContentSource(),
 	}
 
 	upload, err := s.FileServiceClient.Upload(ctx, &fileServicePB.FileUploadRequest{Metadata: md, FilePath: in.GetFilePath()})

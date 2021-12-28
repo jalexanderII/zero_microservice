@@ -11,7 +11,7 @@ import (
 	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/server"
-	contentStore "github.com/jalexanderII/zero_microservice/backend/services/listings/store"
+	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	"github.com/jalexanderII/zero_microservice/gen/listings"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -29,12 +29,18 @@ func main() {
 		panic(err)
 	}
 
-	store := contentStore.NewDiskImageStore("./store/tmp", l)
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", config.FIlESERVICESERVERPORT), grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	fileServiceClient := fileServicePB.NewFileServiceClient(conn)
 	db, err := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
 
 	grpcServer := grpc.NewServer()
-	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, store, l))
+	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, fileServiceClient, l))
 
 	// register the reflection service which allows clients to determine the methods
 	// for this gRPC service

@@ -44,8 +44,7 @@ func (q *Queries) AppendContentBuilding(ctx context.Context, arg AppendContentBu
 }
 
 const createApartment = `-- name: CreateApartment :one
-INSERT INTO apartments (apartment_id,
-                        name,
+INSERT INTO apartments (name,
                         full_address,
                         street,
                         city,
@@ -88,13 +87,11 @@ VALUES ($1,
         $19,
         $20,
         $21,
-        $22,
-        $23)
-RETURNING apartment_id, name, full_address, street, city, state, zip_code, neighborhood, unit, lat, lng, rent, sqft, beds, baths, available_on, days_on_market, description, amenities, upload_ids, is_archived, building_id, realtor_id
+        $22)
+RETURNING apartment_id, name, full_address, street, city, state, zip_code, neighborhood, unit, lat, lng, rent, sqft, beds, baths, available_on, created_at, days_on_market, description, amenities, upload_ids, is_archived, building_id, realtor_id
 `
 
 type CreateApartmentParams struct {
-	ApartmentID  int32          `json:"apartment_id"`
 	Name         string         `json:"name"`
 	FullAddress  string         `json:"full_address"`
 	Street       string         `json:"street"`
@@ -103,8 +100,8 @@ type CreateApartmentParams struct {
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
 	Unit         sql.NullString `json:"unit"`
-	Lat          int32          `json:"lat"`
-	Lng          int32          `json:"lng"`
+	Lat          float64        `json:"lat"`
+	Lng          float64        `json:"lng"`
 	Rent         int32          `json:"rent"`
 	Sqft         sql.NullInt32  `json:"sqft"`
 	Beds         int32          `json:"beds"`
@@ -121,7 +118,6 @@ type CreateApartmentParams struct {
 
 func (q *Queries) CreateApartment(ctx context.Context, arg CreateApartmentParams) (Apartment, error) {
 	row := q.db.QueryRowContext(ctx, createApartment,
-		arg.ApartmentID,
 		arg.Name,
 		arg.FullAddress,
 		arg.Street,
@@ -163,6 +159,7 @@ func (q *Queries) CreateApartment(ctx context.Context, arg CreateApartmentParams
 		&i.Beds,
 		&i.Baths,
 		&i.AvailableOn,
+		&i.CreatedAt,
 		&i.DaysOnMarket,
 		&i.Description,
 		pq.Array(&i.Amenities),
@@ -175,8 +172,7 @@ func (q *Queries) CreateApartment(ctx context.Context, arg CreateApartmentParams
 }
 
 const createBuilding = `-- name: CreateBuilding :one
-INSERT INTO buildings (building_id,
-                       name,
+INSERT INTO buildings (name,
                        full_address,
                        street,
                        city,
@@ -201,13 +197,11 @@ VALUES ($1,
         $10,
         $11,
         $12,
-        $13,
-        $14)
-RETURNING building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id
+        $13)
+RETURNING building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id, created_at
 `
 
 type CreateBuildingParams struct {
-	BuildingID   int32          `json:"building_id"`
 	Name         string         `json:"name"`
 	FullAddress  string         `json:"full_address"`
 	Street       string         `json:"street"`
@@ -215,8 +209,8 @@ type CreateBuildingParams struct {
 	State        string         `json:"state"`
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
-	Lat          int32          `json:"lat"`
-	Lng          int32          `json:"lng"`
+	Lat          float64        `json:"lat"`
+	Lng          float64        `json:"lng"`
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
@@ -225,7 +219,6 @@ type CreateBuildingParams struct {
 
 func (q *Queries) CreateBuilding(ctx context.Context, arg CreateBuildingParams) (Building, error) {
 	row := q.db.QueryRowContext(ctx, createBuilding,
-		arg.BuildingID,
 		arg.Name,
 		arg.FullAddress,
 		arg.Street,
@@ -256,26 +249,24 @@ func (q *Queries) CreateBuilding(ctx context.Context, arg CreateBuildingParams) 
 		pq.Array(&i.Amenities),
 		pq.Array(&i.UploadIds),
 		&i.RealtorID,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const createRealtor = `-- name: CreateRealtor :one
-INSERT INTO realtors (realtor_id,
-                      name,
+INSERT INTO realtors (name,
                       email,
                       phone_number,
                       company)
 VALUES ($1,
         $2,
         $3,
-        $4,
-        $5)
-RETURNING realtor_id, name, email, phone_number, company
+        $4)
+RETURNING realtor_id, name, email, phone_number, company, created_at
 `
 
 type CreateRealtorParams struct {
-	RealtorID   int32          `json:"realtor_id"`
 	Name        string         `json:"name"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`
@@ -284,7 +275,6 @@ type CreateRealtorParams struct {
 
 func (q *Queries) CreateRealtor(ctx context.Context, arg CreateRealtorParams) (Realtor, error) {
 	row := q.db.QueryRowContext(ctx, createRealtor,
-		arg.RealtorID,
 		arg.Name,
 		arg.Email,
 		arg.PhoneNumber,
@@ -297,6 +287,7 @@ func (q *Queries) CreateRealtor(ctx context.Context, arg CreateRealtorParams) (R
 		&i.Email,
 		&i.PhoneNumber,
 		&i.Company,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -335,7 +326,7 @@ func (q *Queries) DeleteRealtor(ctx context.Context, realtorID int32) error {
 }
 
 const getApartment = `-- name: GetApartment :one
-SELECT apartment_id, name, full_address, street, city, state, zip_code, neighborhood, unit, lat, lng, rent, sqft, beds, baths, available_on, days_on_market, description, amenities, upload_ids, is_archived, building_id, realtor_id
+SELECT apartment_id, name, full_address, street, city, state, zip_code, neighborhood, unit, lat, lng, rent, sqft, beds, baths, available_on, created_at, days_on_market, description, amenities, upload_ids, is_archived, building_id, realtor_id
 FROM apartments
 WHERE apartment_id = $1
 `
@@ -360,6 +351,7 @@ func (q *Queries) GetApartment(ctx context.Context, apartmentID int32) (Apartmen
 		&i.Beds,
 		&i.Baths,
 		&i.AvailableOn,
+		&i.CreatedAt,
 		&i.DaysOnMarket,
 		&i.Description,
 		pq.Array(&i.Amenities),
@@ -372,7 +364,7 @@ func (q *Queries) GetApartment(ctx context.Context, apartmentID int32) (Apartmen
 }
 
 const getBuilding = `-- name: GetBuilding :one
-SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id
+SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id, created_at
 FROM buildings
 WHERE building_id = $1
 `
@@ -395,12 +387,13 @@ func (q *Queries) GetBuilding(ctx context.Context, buildingID int32) (Building, 
 		pq.Array(&i.Amenities),
 		pq.Array(&i.UploadIds),
 		&i.RealtorID,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getRealtor = `-- name: GetRealtor :one
-SELECT realtor_id, name, email, phone_number, company
+SELECT realtor_id, name, email, phone_number, company, created_at
 FROM realtors
 WHERE realtor_id = $1
 `
@@ -414,12 +407,13 @@ func (q *Queries) GetRealtor(ctx context.Context, realtorID int32) (Realtor, err
 		&i.Email,
 		&i.PhoneNumber,
 		&i.Company,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listApartments = `-- name: ListApartments :many
-SELECT apartment_id, name, full_address, street, city, state, zip_code, neighborhood, unit, lat, lng, rent, sqft, beds, baths, available_on, days_on_market, description, amenities, upload_ids, is_archived, building_id, realtor_id
+SELECT apartment_id, name, full_address, street, city, state, zip_code, neighborhood, unit, lat, lng, rent, sqft, beds, baths, available_on, created_at, days_on_market, description, amenities, upload_ids, is_archived, building_id, realtor_id
 FROM apartments
 ORDER BY apartment_id
 `
@@ -450,6 +444,7 @@ func (q *Queries) ListApartments(ctx context.Context) ([]Apartment, error) {
 			&i.Beds,
 			&i.Baths,
 			&i.AvailableOn,
+			&i.CreatedAt,
 			&i.DaysOnMarket,
 			&i.Description,
 			pq.Array(&i.Amenities),
@@ -472,7 +467,7 @@ func (q *Queries) ListApartments(ctx context.Context) ([]Apartment, error) {
 }
 
 const listBuildings = `-- name: ListBuildings :many
-SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id
+SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id, created_at
 FROM buildings
 ORDER BY building_id
 `
@@ -501,6 +496,7 @@ func (q *Queries) ListBuildings(ctx context.Context) ([]Building, error) {
 			pq.Array(&i.Amenities),
 			pq.Array(&i.UploadIds),
 			&i.RealtorID,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -516,7 +512,7 @@ func (q *Queries) ListBuildings(ctx context.Context) ([]Building, error) {
 }
 
 const listRealtors = `-- name: ListRealtors :many
-SELECT realtor_id, name, email, phone_number, company
+SELECT realtor_id, name, email, phone_number, company, created_at
 FROM realtors
 ORDER BY realtor_id
 `
@@ -536,6 +532,7 @@ func (q *Queries) ListRealtors(ctx context.Context) ([]Realtor, error) {
 			&i.Email,
 			&i.PhoneNumber,
 			&i.Company,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -587,8 +584,8 @@ type UpdateApartmentParams struct {
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
 	Unit         sql.NullString `json:"unit"`
-	Lat          int32          `json:"lat"`
-	Lng          int32          `json:"lng"`
+	Lat          float64        `json:"lat"`
+	Lng          float64        `json:"lng"`
 	Rent         int32          `json:"rent"`
 	Sqft         sql.NullInt32  `json:"sqft"`
 	Beds         int32          `json:"beds"`
@@ -659,8 +656,8 @@ type UpdateBuildingParams struct {
 	State        string         `json:"state"`
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
-	Lat          int32          `json:"lat"`
-	Lng          int32          `json:"lng"`
+	Lat          float64        `json:"lat"`
+	Lng          float64        `json:"lng"`
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
@@ -713,45 +710,4 @@ func (q *Queries) UpdateRealtor(ctx context.Context, arg UpdateRealtorParams) er
 		arg.Company,
 	)
 	return err
-}
-
-const uploadContent = `-- name: UploadContent :one
-INSERT INTO content (content_id,
-                     filename,
-                     content_type,
-                     content_source,
-                     source_id)
-VALUES ($1,
-        $2,
-        $3,
-        $4,
-        $5)
-RETURNING content_id, filename, content_type, content_source, source_id
-`
-
-type UploadContentParams struct {
-	ContentID     int32          `json:"content_id"`
-	Filename      sql.NullString `json:"filename"`
-	ContentType   ContentType    `json:"content_type"`
-	ContentSource ContentSource  `json:"content_source"`
-	SourceID      int32          `json:"source_id"`
-}
-
-func (q *Queries) UploadContent(ctx context.Context, arg UploadContentParams) (Content, error) {
-	row := q.db.QueryRowContext(ctx, uploadContent,
-		arg.ContentID,
-		arg.Filename,
-		arg.ContentType,
-		arg.ContentSource,
-		arg.SourceID,
-	)
-	var i Content
-	err := row.Scan(
-		&i.ContentID,
-		&i.Filename,
-		&i.ContentType,
-		&i.ContentSource,
-		&i.SourceID,
-	)
-	return i, err
 }

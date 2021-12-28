@@ -30,9 +30,10 @@ CREATE INDEX applications_name_idx ON applications (name);
 CREATE TABLE IF NOT EXISTS application_response
 (
     application_response_id SERIAL PRIMARY KEY,
-    reference_id            uuid DEFAULT uuid_generate_v4(),
+    reference_id            uuid                        DEFAULT uuid_generate_v4(),
     status                  application_status NOT NULL,
-    application_id          integer            NOT NULL REFERENCES applications (application_request_id)
+    application_id          integer            NOT NULL REFERENCES applications (application_request_id),
+    created_at              timestamp          NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX application_response_reference_id_idx ON application_response (reference_id);

@@ -12,7 +12,6 @@ func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.Create
 	s.l.Debug("CreateRealtor")
 	var realtorpb = in.Realtor
 	realtor, err := s.DB.CreateRealtor(ctx, genDB.CreateRealtorParams{
-		RealtorID:   realtorpb.Id,
 		Name:        realtorpb.Name,
 		Email:       sql.NullString{String: realtorpb.Email, Valid: true},
 		PhoneNumber: sql.NullString{String: realtorpb.PhoneNumber, Valid: true},

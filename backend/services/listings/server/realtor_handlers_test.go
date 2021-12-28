@@ -14,21 +14,20 @@ func Test_listingsServer_CreateRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: Store, l: L}
+	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	in := &listingsPB.Realtor{
-		Id:          2,
-		Name:        "example2",
-		Email:       "example2",
-		PhoneNumber: "example2",
-		Company:     "example2",
+		Name:        "Fitore Abazaga",
+		Email:       "f.abazaga@platinum.com",
+		PhoneNumber: "(646) 339-3247",
+		Company:     "Platinum Properties",
 	}
 
 	realtor, err := server.CreateRealtor(ctx, &listingsPB.CreateRealtorRequest{Realtor: in})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtor.Id != 2 && realtor.Name != "example2" {
+	if realtor.Name != in.Name {
 		t.Errorf("1: An error creating a realtor: %+v", realtor)
 	}
 }
@@ -39,13 +38,13 @@ func Test_listingsServer_GetRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: Store, l: L}
+	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
-	realtor, err := server.GetRealtor(ctx, &listingsPB.GetRealtorRequest{Id: 2})
+	realtor, err := server.GetRealtor(ctx, &listingsPB.GetRealtorRequest{Id: 1})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtor.Name != "example2" {
+	if realtor.Name != "Fitore Abazaga" {
 		t.Errorf("2: Failed to fetch correct realtor: %+v", realtor)
 	}
 }
@@ -56,13 +55,13 @@ func Test_listingsServer_ListRealtors(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: Store, l: L}
+	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtors.Realtors[0].Name != "example" {
+	if len(realtors.Realtors) < 1 {
 		t.Errorf("2: Failed to fetch realtors: %+v", realtors.Realtors[0])
 	}
 }
@@ -73,19 +72,19 @@ func Test_listingsServer_UpdateRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: Store, l: L}
+	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 	in := &listingsPB.Realtor{
 		Id:          1,
-		Name:        "Updated",
-		Email:       "Updated",
-		PhoneNumber: "Updated",
-		Company:     "Updated",
+		Name:        "Fitore Abazaga",
+		Email:       "f.abazaga@gmail.com",
+		PhoneNumber: "(646) 339-3247",
+		Company:     "Platinum Properties",
 	}
 	realtor, err := server.UpdateRealtor(ctx, &listingsPB.UpdateRealtorRequest{Id: 1, Realtor: in})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtor.Name != "Updated" {
+	if realtor.Email != in.Email {
 		t.Errorf("2: Failed to fetch correct realtor: %+v", realtor)
 	}
 }
@@ -96,10 +95,9 @@ func Test_listingsServer_DeleteRealtor(t *testing.T) {
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
-	server := listingsServer{DB: listingDB, ContentStore: Store, l: L}
+	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
 	in := &listingsPB.Realtor{
-		Id:          3,
 		Name:        "to_delete",
 		Email:       "to_delete",
 		PhoneNumber: "to_delete",
@@ -111,17 +109,17 @@ func Test_listingsServer_DeleteRealtor(t *testing.T) {
 	}
 	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
 	if err != nil {
-		t.Errorf("1: An error was returned: %v", err)
+		t.Errorf("2: An error was returned: %v", err)
 	}
-	if len(realtors.Realtors) != 3 {
-		t.Errorf("1: An error adding a temp realtor, number of realtors in DB: %v", len(realtors.Realtors))
+	if len(realtors.Realtors) < 2 {
+		t.Errorf("3: An error adding a temp realtor, number of realtors in DB: %v", len(realtors.Realtors))
 	}
 
 	deleted, err := server.DeleteRealtor(ctx, &listingsPB.DeleteRealtorRequest{Id: realtor.Id})
 	if err != nil {
-		t.Errorf("1: An error was returned: %v", err)
+		t.Errorf("4: An error was returned: %v", err)
 	}
 	if deleted.Status != listingsPB.STATUS_SUCCESS {
-		t.Errorf("2: Failed to delete realtor: %+v\n, %+v", deleted.Status, deleted.GetRealtor())
+		t.Errorf("5: Failed to delete realtor: %+v\n, %+v", deleted.Status, deleted.GetRealtor())
 	}
 }

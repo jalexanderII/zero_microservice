@@ -5,35 +5,38 @@ option go_package = "./proto;listings";
 
 enum STATUS {
   STATUS_UNKNOWN = 0;
-  SUCCESS = 1;
-  FAIL = 2;
+  PENDING = 1;
+  IN_PROGRESS = 2;
+  SUCCESS = 3;
+  FAILED = 4;
 }
 
-message UploadContentRequest {
-  oneof data {
-    ContentInfo info = 1;
-    bytes chunk_data = 2;
-  };
+enum ContentType {
+  TYPE_UNKNOWN = 0;
+  IMAGE = 1;
+  VIDEO = 2;
+  FILE = 3;
 }
 
-message ContentInfo {
-  enum ContentType {
-    TYPE_UNKNOWN = 0;
-    IMAGE = 1;
-    VIDEO = 2;
-  }
-  enum ContentSource {
-    SOURCE_UNKNOWN = 0;
-    APARTMENT = 1;
-    BUILDING = 2;
-  }
-
-  int32 source_id = 1;
-  ContentType content_type = 2;
-  ContentSource content_source = 3;
+enum ContentSource {
+  SOURCE_UNKNOWN = 0;
+  APARTMENT = 1;
+  BUILDING = 2;
 }
 
-message UploadContentResponse {
-  int32 content_id = 1;
-  uint32 size = 2;
+message MetaData {
+  string Name = 1;
+  int32 Source_id = 2;
+  ContentType Content_type = 3;
+  ContentSource Content_source = 4;
+}
+
+message FileUploadRequest {
+  MetaData Metadata = 1;
+  string File_path = 2;
+}
+
+message FileUploadResponse {
+  string name = 1;
+  STATUS status = 2;
 }

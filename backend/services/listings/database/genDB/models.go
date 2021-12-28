@@ -4,49 +4,8 @@ package genDB
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 )
-
-type ContentSource string
-
-const (
-	ContentSourceSOURCEUNKNOWN ContentSource = "SOURCE_UNKNOWN"
-	ContentSourceAPARTMENT     ContentSource = "APARTMENT"
-	ContentSourceBUILDING      ContentSource = "BUILDING"
-)
-
-func (e *ContentSource) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = ContentSource(s)
-	case string:
-		*e = ContentSource(s)
-	default:
-		return fmt.Errorf("unsupported scan type for ContentSource: %T", src)
-	}
-	return nil
-}
-
-type ContentType string
-
-const (
-	ContentTypeTYPEUNKNOWN ContentType = "TYPE_UNKNOWN"
-	ContentTypeIMAGE       ContentType = "IMAGE"
-	ContentTypeVIDEO       ContentType = "VIDEO"
-)
-
-func (e *ContentType) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = ContentType(s)
-	case string:
-		*e = ContentType(s)
-	default:
-		return fmt.Errorf("unsupported scan type for ContentType: %T", src)
-	}
-	return nil
-}
 
 type Apartment struct {
 	ApartmentID  int32          `json:"apartment_id"`
@@ -58,13 +17,14 @@ type Apartment struct {
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
 	Unit         sql.NullString `json:"unit"`
-	Lat          int32          `json:"lat"`
-	Lng          int32          `json:"lng"`
+	Lat          float64        `json:"lat"`
+	Lng          float64        `json:"lng"`
 	Rent         int32          `json:"rent"`
 	Sqft         sql.NullInt32  `json:"sqft"`
 	Beds         int32          `json:"beds"`
 	Baths        int32          `json:"baths"`
 	AvailableOn  time.Time      `json:"available_on"`
+	CreatedAt    time.Time      `json:"created_at"`
 	DaysOnMarket sql.NullInt32  `json:"days_on_market"`
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
@@ -83,20 +43,13 @@ type Building struct {
 	State        string         `json:"state"`
 	ZipCode      int32          `json:"zip_code"`
 	Neighborhood string         `json:"neighborhood"`
-	Lat          int32          `json:"lat"`
-	Lng          int32          `json:"lng"`
+	Lat          float64        `json:"lat"`
+	Lng          float64        `json:"lng"`
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
 	RealtorID    int32          `json:"realtor_id"`
-}
-
-type Content struct {
-	ContentID     int32          `json:"content_id"`
-	Filename      sql.NullString `json:"filename"`
-	ContentType   ContentType    `json:"content_type"`
-	ContentSource ContentSource  `json:"content_source"`
-	SourceID      int32          `json:"source_id"`
+	CreatedAt    time.Time      `json:"created_at"`
 }
 
 type Realtor struct {
@@ -105,4 +58,5 @@ type Realtor struct {
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`
 	Company     sql.NullString `json:"company"`
+	CreatedAt   time.Time      `json:"created_at"`
 }

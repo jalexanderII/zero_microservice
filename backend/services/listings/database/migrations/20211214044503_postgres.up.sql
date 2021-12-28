@@ -1,31 +1,11 @@
-CREATE TYPE content_type AS ENUM (
-    'TYPE_UNKNOWN',
-    'IMAGE',
-    'VIDEO'
-    );
-
-CREATE TYPE content_source AS ENUM (
-    'SOURCE_UNKNOWN',
-    'APARTMENT',
-    'BUILDING'
-    );
-
-CREATE TABLE IF NOT EXISTS content
-(
-    content_id     SERIAL PRIMARY KEY,
-    filename       text,
-    content_type   content_type,
-    content_source content_source,
-    source_id      integer NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS realtors
 (
     realtor_id   SERIAL PRIMARY KEY,
     name         varchar(255) NOT NULL,
     email        text,
     phone_number text,
-    company      text
+    company      text,
+    created_at   timestamp    NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX realtors_name_idx ON realtors (name);
@@ -40,12 +20,13 @@ CREATE TABLE IF NOT EXISTS buildings
     state        text         NOT NULL,
     zip_code     integer      NOT NULL,
     neighborhood text         NOT NULL,
-    lat          integer      NOT NULL,
-    lng          integer      NOT NULL,
+    lat          float        NOT NULL,
+    lng          float        NOT NULL,
     description  text,
     amenities    text[],
     upload_ids   text[],
-    realtor_id   integer      NOT NULL REFERENCES realtors (realtor_id)
+    realtor_id   integer      NOT NULL REFERENCES realtors (realtor_id),
+    created_at   timestamp    NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX buildings_name_idx ON buildings (name);
@@ -61,8 +42,8 @@ CREATE TABLE IF NOT EXISTS apartments
     zip_code       integer      NOT NULL,
     neighborhood   text         NOT NULL,
     unit           text,
-    lat            integer      NOT NULL,
-    lng            integer      NOT NULL,
+    lat            float        NOT NULL,
+    lng            float        NOT NULL,
     rent           integer      NOT NULL,
     sqft           integer,
     beds           integer      NOT NULL,

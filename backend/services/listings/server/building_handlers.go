@@ -5,14 +5,23 @@ import (
 	"database/sql"
 
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/database/genDB"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/external_apis/geocensus"
+	"github.com/jalexanderII/zero_microservice/backend/services/listings/utils"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 )
 
 func (s listingsServer) CreateBuilding(ctx context.Context, in *listingsPB.CreateBuildingRequest) (*listingsPB.Building, error) {
 	s.l.Debug("CreateBuilding")
 	var buildingpb = in.Building
+
+	coords, err := geocensus.GetGeoCodeZip(
+		buildingpb.Street, buildingpb.City, buildingpb.State, utils.FastStringConv(buildingpb.ZipCode), false,
+	)
+	if err != nil {
+		s.l.Error("Could not fetch coordinates", "error", err)
+	}
+
 	building, err := s.DB.CreateBuilding(ctx, genDB.CreateBuildingParams{
-		BuildingID:   buildingpb.Id,
 		Name:         buildingpb.Name,
 		FullAddress:  buildingpb.FullAddress,
 		Street:       buildingpb.Street,
@@ -20,8 +29,8 @@ func (s listingsServer) CreateBuilding(ctx context.Context, in *listingsPB.Creat
 		State:        buildingpb.State,
 		ZipCode:      buildingpb.ZipCode,
 		Neighborhood: buildingpb.Neighborhood,
-		Lat:          int32(buildingpb.Lat),
-		Lng:          int32(buildingpb.Lng),
+		Lat:          coords.X,
+		Lng:          coords.Y,
 		Description:  sql.NullString{String: buildingpb.Description, Valid: true},
 		Amenities:    buildingpb.Amenities,
 		UploadIds:    buildingpb.UploadIds,
@@ -70,8 +79,8 @@ func (s listingsServer) UpdateBuilding(ctx context.Context, in *listingsPB.Updat
 		State:        buildingpb.State,
 		ZipCode:      buildingpb.ZipCode,
 		Neighborhood: buildingpb.Neighborhood,
-		Lat:          int32(buildingpb.Lat),
-		Lng:          int32(buildingpb.Lng),
+		Lat:          buildingpb.Lat,
+		Lng:          buildingpb.Lng,
 		Description:  sql.NullString{String: buildingpb.Description, Valid: true},
 		Amenities:    buildingpb.Amenities,
 		UploadIds:    buildingpb.UploadIds,
@@ -110,8 +119,8 @@ func BuildingDBtoPB(building genDB.Building) *listingsPB.Building {
 		State:        building.State,
 		ZipCode:      building.ZipCode,
 		Neighborhood: building.Neighborhood,
-		Lat:          float64(building.Lat),
-		Lng:          float64(building.Lng),
+		Lat:          building.Lat,
+		Lng:          building.Lng,
 		Description:  building.Description.String,
 		Amenities:    building.Amenities,
 		UploadIds:    building.UploadIds,

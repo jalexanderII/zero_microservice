@@ -28,7 +28,7 @@ service Listings {
   rpc ListRealtors(ListRealtorRequest) returns (ListRealtorResponse);
   rpc UpdateRealtor(UpdateRealtorRequest) returns (Realtor);
   rpc DeleteRealtor(DeleteRealtorRequest) returns (DeleteRealtorResponse);
-  // Upload and Delete images or videos from/to blob store
-  rpc UploadContent(stream UploadContentRequest) returns (UploadContentResponse);
+  // Call to FileService to upload documents
+  rpc Upload(FileUploadRequest) returns (FileUploadResponse);
 }
 

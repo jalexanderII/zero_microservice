@@ -1,6 +1,5 @@
 -- name: CreateApartment :one
-INSERT INTO apartments (apartment_id,
-                        name,
+INSERT INTO apartments (name,
                         full_address,
                         street,
                         city,
@@ -43,8 +42,7 @@ VALUES ($1,
         $19,
         $20,
         $21,
-        $22,
-        $23)
+        $22)
 RETURNING *;
 
 -- name: GetApartment :one
@@ -89,8 +87,7 @@ FROM apartments
 WHERE apartment_id = $1;
 
 -- name: CreateBuilding :one
-INSERT INTO buildings (building_id,
-                       name,
+INSERT INTO buildings (name,
                        full_address,
                        street,
                        city,
@@ -115,8 +112,7 @@ VALUES ($1,
         $10,
         $11,
         $12,
-        $13,
-        $14)
+        $13)
 RETURNING *;
 
 -- name: GetBuilding :one
@@ -152,16 +148,14 @@ FROM buildings
 WHERE building_id = $1;
 
 -- name: CreateRealtor :one
-INSERT INTO realtors (realtor_id,
-                      name,
+INSERT INTO realtors (name,
                       email,
                       phone_number,
                       company)
 VALUES ($1,
         $2,
         $3,
-        $4,
-        $5)
+        $4)
 RETURNING *;
 
 -- name: GetRealtor :one
@@ -186,19 +180,6 @@ WHERE realtor_id = $1;
 DELETE
 FROM realtors
 WHERE realtor_id = $1;
-
--- name: UploadContent :one
-INSERT INTO content (content_id,
-                     filename,
-                     content_type,
-                     content_source,
-                     source_id)
-VALUES ($1,
-        $2,
-        $3,
-        $4,
-        $5)
-RETURNING *;
 
 -- name: AppendContentApartment :exec
 UPDATE apartments
