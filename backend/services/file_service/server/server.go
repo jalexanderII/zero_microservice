@@ -19,11 +19,11 @@ import (
 
 type fileServiceServer struct {
 	fileServicePB.UnimplementedFileServiceServer
-	DB *mongo.Client
+	DB mongo.Database
 	l  hclog.Logger
 }
 
-func NewFileServiceServer(db *mongo.Client, l hclog.Logger) *fileServiceServer {
+func NewFileServiceServer(db mongo.Database, l hclog.Logger) *fileServiceServer {
 	return &fileServiceServer{DB: db, l: l}
 }
 
@@ -37,7 +37,7 @@ func (s fileServiceServer) Upload(ctx context.Context, in *fileServicePB.FileUpl
 		return nil, err
 	}
 
-	bucket, err := gridfs.NewBucket(s.DB.Database(config.CONTENTDBNAME))
+	bucket, err := gridfs.NewBucket(&s.DB)
 	if err != nil {
 		s.l.Error("[Error] cannot get mongo bucket", "error", err)
 		return nil, err
@@ -62,8 +62,7 @@ func (s fileServiceServer) Upload(ctx context.Context, in *fileServicePB.FileUpl
 
 func (s fileServiceServer) Download(ctx context.Context, in *fileServicePB.FileDownloadRequest) (*fileServicePB.FileDownloadResponse, error) {
 	s.l.Debug("DownloadContent")
-	db := s.DB.Database(config.CONTENTDBNAME)
-	fsFiles := db.Collection("fs.files")
+	fsFiles := s.DB.Collection("fs.files")
 
 	var results bson.M
 	err := fsFiles.FindOne(ctx, bson.M{"filename": in.GetFileName()}).Decode(&results)
@@ -74,7 +73,7 @@ func (s fileServiceServer) Download(ctx context.Context, in *fileServicePB.FileD
 	md := MongoMetaDataToPB(results)
 	s.l.Info("Fetched metaData from file:", "MetaData", md)
 
-	bucket, _ := gridfs.NewBucket(db)
+	bucket, _ := gridfs.NewBucket(&s.DB)
 	var buf bytes.Buffer
 	dStream, err := bucket.DownloadToStreamByName(in.GetFileName(), &buf)
 	if err != nil {

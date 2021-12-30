@@ -1,7 +1,7 @@
 package database
 
 import (
-	"context"
+	"log"
 	"time"
 
 	config "github.com/jalexanderII/zero_microservice"
@@ -9,22 +9,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func InitiateMongoClient() (*mongo.Client, error) {
+func InitiateMongoClient() mongo.Database {
 	var err error
 	var client *mongo.Client
 	uri := config.MONGOURI
 	opts := options.Client()
 	opts.ApplyURI(uri)
 	opts.SetMaxPoolSize(5)
-	ctx, cancel := NewDBContext(10 * time.Second)
+	ctx, cancel := config.NewDBContext(10 * time.Second)
 	defer cancel()
 	if client, err = mongo.Connect(ctx, opts); err != nil {
-		return nil, err
+		log.Fatalf("Error connecting to DB: %v", err)
 	}
-	return client, nil
-}
-
-// NewDBContext returns a new Context according to app performance
-func NewDBContext(d time.Duration) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), d*config.Performance/100)
+	return *client.Database(config.CONTENTDBNAME)
 }

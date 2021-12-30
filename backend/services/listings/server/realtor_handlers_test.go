@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
+	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 )
 
 func Test_listingsServer_CreateRealtor(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -33,7 +34,7 @@ func Test_listingsServer_CreateRealtor(t *testing.T) {
 }
 
 func Test_listingsServer_GetRealtor(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -50,7 +51,7 @@ func Test_listingsServer_GetRealtor(t *testing.T) {
 }
 
 func Test_listingsServer_ListRealtors(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -67,7 +68,7 @@ func Test_listingsServer_ListRealtors(t *testing.T) {
 }
 
 func Test_listingsServer_UpdateRealtor(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -90,7 +91,7 @@ func Test_listingsServer_UpdateRealtor(t *testing.T) {
 }
 
 func Test_listingsServer_DeleteRealtor(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()

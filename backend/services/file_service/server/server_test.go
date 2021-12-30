@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
+	config "github.com/jalexanderII/zero_microservice"
 	fileServiceDB "github.com/jalexanderII/zero_microservice/backend/services/file_service/database"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 )
@@ -12,10 +13,10 @@ import (
 var L = hclog.Default()
 
 func Test_fileServiceServer_Upload(t *testing.T) {
-	ctx, cancel := fileServiceDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
-	db, _ := fileServiceDB.InitiateMongoClient()
+	db := fileServiceDB.InitiateMongoClient()
 	server := fileServiceServer{DB: db, l: L}
 	in := &fileServicePB.FileUploadRequest{
 		Metadata: &fileServicePB.MetaData{
@@ -37,10 +38,10 @@ func Test_fileServiceServer_Upload(t *testing.T) {
 }
 
 func Test_fileServiceServer_Download(t *testing.T) {
-	ctx, cancel := fileServiceDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
-	db, _ := fileServiceDB.InitiateMongoClient()
+	db := fileServiceDB.InitiateMongoClient()
 	server := fileServiceServer{DB: db, l: L}
 	in := &fileServicePB.FileDownloadRequest{
 		FileName: "icon.png",

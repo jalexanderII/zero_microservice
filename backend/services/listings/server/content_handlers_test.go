@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
+	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 )
 
 func Test_listingsServer_Upload(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()

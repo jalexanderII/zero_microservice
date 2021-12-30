@@ -20,13 +20,12 @@ func MockFileServiceClient() fileServicePB.FileServiceClient {
 	if err != nil {
 		panic(err)
 	}
-	// defer conn.Close()
 
 	return fileServicePB.NewFileServiceClient(conn)
 }
 
 func Test_applicationServer_Apply(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -74,7 +73,7 @@ func Test_applicationServer_Apply(t *testing.T) {
 }
 
 func Test_applicationServer_Upload(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()

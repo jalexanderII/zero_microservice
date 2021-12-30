@@ -6,105 +6,113 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"time"
 
+	"github.com/hashicorp/go-hclog"
 	config "github.com/jalexanderII/zero_microservice"
-	database2 "github.com/jalexanderII/zero_microservice/backend/services/users/database"
+	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
+	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-type authServer struct {
+type AuthServer struct {
 	userPB.UnimplementedAuthServiceServer
-	userCollection mongo.Collection
+	DB   mongo.Collection
+	jwtm *middleware.JWTManager
+	l    hclog.Logger
 }
 
-func NewServer(c mongo.Collection) *authServer {
-	return &authServer{userCollection: c}
+func NewAuthServer(DB mongo.Collection, jwtm *middleware.JWTManager, l hclog.Logger) *AuthServer {
+	return &AuthServer{DB: DB, jwtm: jwtm, l: l}
 }
 
-func (server authServer) Login(ctx context.Context, in *userPB.LoginRequest) (*userPB.AuthResponse, error) {
-	login, password := in.GetLogin(), in.GetPassword()
-	ctx, cancel := database2.NewDBContext(5 * time.Second)
-	defer cancel()
-
-	var user database2.User
-	err := server.userCollection.FindOne(ctx, bson.M{"$or": []bson.M{{"username": login}, {"email": login}}}).Decode(&user)
+func (server AuthServer) Login(ctx context.Context, in *userPB.LoginRequest) (*userPB.AuthResponse, error) {
+	username, password := in.GetUsername(), in.GetPassword()
+	var user userDB.User
+	err := server.DB.FindOne(ctx, bson.M{"$or": []bson.M{{"username": username}, {"email": username}}}).Decode(&user)
 	if err != nil {
-		return nil, fmt.Errorf("something went wrong: %v", err)
+		return nil, fmt.Errorf("cannot find user: %v", err)
 	}
-	if user == database2.NilUser || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+	if user == userDB.NilUser || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
 		return nil, errors.New("wrong login credentials provided")
 	}
-	return &userPB.AuthResponse{Token: user.GetToken()}, nil
+
+	token, err := server.jwtm.Generate(&user)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot generate access token")
+	}
+
+	return &userPB.AuthResponse{Token: token}, nil
 }
 
-func (server authServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (*userPB.AuthResponse, error) {
-	username, email, password := in.GetUsername(), in.GetEmail(), in.GetPassword()
+func (server AuthServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (*userPB.AuthResponse, error) {
+	username, email, password, role := in.GetUsername(), in.GetEmail(), in.GetPassword(), in.GetRole()
 	match, _ := regexp.MatchString(config.EmailRegex, email)
-	if len(username) < 4 || len(username) > 20 || len(email) < 7 || len(email) > 35 || len(password) < 8 || len(password) > 128 || !match {
-		return nil, errors.New("validation failed")
+	if !match {
+		return nil, errors.New("email validation failed")
 	}
-	res, err := server.UsernameUsed(context.Background(), &userPB.UsernameUsedRequest{Username: username})
+	res, err := UsernameUsed(ctx, server.DB, username)
 	if err != nil {
 		log.Printf("Error returned from UsernameUsed: %v\n", err)
-		return nil, errors.New("something went wrong")
+		return nil, err
 	}
-	if res.GetUsed() {
+	if res {
 		return nil, errors.New("username already taken")
 	}
 
-	res, err = server.EmailUsed(context.Background(), &userPB.EmailUsedRequest{Email: email})
+	res, err = EmailUsed(ctx, server.DB, email)
 	if err != nil {
 		log.Printf("Error returned from EmailUsed: %v\n", err)
-		return nil, errors.New("EmailUsed")
+		return nil, err
 	}
-	if res.GetUsed() {
+	if res {
 		return nil, errors.New("email already used")
 	}
 
 	pw, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	newUser := database2.User{ID: primitive.NewObjectID(), Email: email, Username: username, Password: string(pw)}
+	newUser := userDB.User{ID: primitive.NewObjectID(), Email: email, Username: username, Password: string(pw), Role: userDB.Role(role)}
 
-	ctx, cancel := database2.NewDBContext(5 * time.Second)
-	defer cancel()
-	_, err = server.userCollection.InsertOne(ctx, newUser)
+	_, err = server.DB.InsertOne(ctx, newUser)
 	if err != nil {
 		log.Printf("Error inserting new user: %v\n", err)
-		return nil, errors.New("something went wrong")
+		return nil, err
 	}
-	return &userPB.AuthResponse{Token: newUser.GetToken()}, nil
-}
 
-func (server authServer) EmailUsed(ctx context.Context, in *userPB.EmailUsedRequest) (*userPB.UsedResponse, error) {
-	var email = in.GetEmail()
-	ctx, cancel := database2.NewDBContext(5 * time.Second)
-	defer cancel()
-	var result database2.User
-	err := server.userCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
+	token, err := server.jwtm.Generate(&newUser)
 	if err != nil {
-		return nil, fmt.Errorf("something went wrong: %v", err)
+		return nil, status.Errorf(codes.Internal, "cannot generate access token")
 	}
-	return &userPB.UsedResponse{Used: result != database2.NilUser}, nil
+
+	return &userPB.AuthResponse{Token: token}, nil
 }
 
-func (server authServer) UsernameUsed(ctx context.Context, in *userPB.UsernameUsedRequest) (*userPB.UsedResponse, error) {
-	var username = in.GetUsername()
-	ctx, cancel := database2.NewDBContext(5 * time.Second)
-	defer cancel()
-	var result database2.User
-	err := server.userCollection.FindOne(ctx, bson.M{"username": username}).Decode(&result)
+func EmailUsed(ctx context.Context, DB mongo.Collection, email string) (bool, error) {
+	var result userDB.User
+	err := DB.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 	if err != nil {
-		return nil, fmt.Errorf("something went wrong: %v", err)
+		// ErrNoDocuments means that the filter did not match any documents in the collection.
+		if err == mongo.ErrNoDocuments {
+			return true, fmt.Errorf("not found: %v", err)
+		}
+		return true, fmt.Errorf("error fetching email: %v", err)
 	}
-	return &userPB.UsedResponse{Used: result != database2.NilUser}, nil
+	return result != userDB.NilUser, nil
 }
 
-func (server authServer) AuthUser(_ context.Context, in *userPB.AuthUserRequest) (*userPB.AuthUserResponse, error) {
-	var token = in.GetToken()
-	user := database2.UserFromToken(token)
-	return &userPB.AuthUserResponse{ID: user.ID.Hex(), Username: user.Username, Email: user.Email}, nil
+func UsernameUsed(ctx context.Context, DB mongo.Collection, username string) (bool, error) {
+	var result userDB.User
+	err := DB.FindOne(ctx, bson.M{"username": username}).Decode(&result)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection.
+		if err == mongo.ErrNoDocuments {
+			return true, fmt.Errorf("not found: %v", err)
+		}
+		return true, fmt.Errorf("error fetching username: %v", err)
+	}
+	return result != userDB.NilUser, nil
 }

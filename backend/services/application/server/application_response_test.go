@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	config "github.com/jalexanderII/zero_microservice"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/application/database/genDB"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 )
 
 func Test_applicationServer_CreateResponse(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -34,7 +35,7 @@ func Test_applicationServer_CreateResponse(t *testing.T) {
 }
 
 func Test_applicationServer_GetResponse(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -51,7 +52,7 @@ func Test_applicationServer_GetResponse(t *testing.T) {
 }
 
 func Test_applicationServer_ListResponses(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -68,7 +69,7 @@ func Test_applicationServer_ListResponses(t *testing.T) {
 }
 
 func Test_applicationServer_UpdateResponse(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -88,7 +89,7 @@ func Test_applicationServer_UpdateResponse(t *testing.T) {
 }
 
 func Test_applicationServer_DeleteResponse(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()

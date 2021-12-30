@@ -1054,5 +1054,66 @@ proto.listings.ListingsPromiseClient.prototype.deleteRealtor =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.listings.FileUploadRequest,
+ *   !proto.listings.FileUploadResponse>}
+ */
+const methodDescriptor_Listings_Upload = new grpc.web.MethodDescriptor(
+  '/listings.Listings/Upload',
+  grpc.web.MethodType.UNARY,
+  content_pb.FileUploadRequest,
+  content_pb.FileUploadResponse,
+  /**
+   * @param {!proto.listings.FileUploadRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  content_pb.FileUploadResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.listings.FileUploadRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.listings.FileUploadResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.listings.FileUploadResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.listings.ListingsClient.prototype.upload =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/listings.Listings/Upload',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_Upload,
+      callback);
+};
+
+
+/**
+ * @param {!proto.listings.FileUploadRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.listings.FileUploadResponse>}
+ *     Promise that resolves to the response
+ */
+proto.listings.ListingsPromiseClient.prototype.upload =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/listings.Listings/Upload',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_Upload);
+};
+
+
 module.exports = proto.listings;
 

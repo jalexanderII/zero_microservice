@@ -4,13 +4,14 @@ import (
 	"testing"
 	"time"
 
+	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func Test_listingsServer_CreateApartment(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -52,7 +53,7 @@ func Test_listingsServer_CreateApartment(t *testing.T) {
 }
 
 func Test_listingsServer_GetApartment(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -69,7 +70,7 @@ func Test_listingsServer_GetApartment(t *testing.T) {
 }
 
 func Test_listingsServer_ListApartments(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -86,7 +87,7 @@ func Test_listingsServer_ListApartments(t *testing.T) {
 }
 
 func Test_listingsServer_UpdateApartment(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
@@ -125,7 +126,7 @@ func Test_listingsServer_UpdateApartment(t *testing.T) {
 }
 
 func Test_listingsServer_DeleteApartment(t *testing.T) {
-	ctx, cancel := listingsDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()

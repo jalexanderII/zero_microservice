@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
+	config "github.com/jalexanderII/zero_microservice"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 )
 
 func Test_applicationServer_CreateApplication(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -40,7 +41,7 @@ func Test_applicationServer_CreateApplication(t *testing.T) {
 }
 
 func Test_applicationServer_GetApplication(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -57,7 +58,7 @@ func Test_applicationServer_GetApplication(t *testing.T) {
 }
 
 func Test_applicationServer_ListApplications(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -74,7 +75,7 @@ func Test_applicationServer_ListApplications(t *testing.T) {
 }
 
 func Test_applicationServer_UpdateApplication(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()
@@ -99,7 +100,7 @@ func Test_applicationServer_UpdateApplication(t *testing.T) {
 }
 
 func Test_applicationServer_DeleteApplication(t *testing.T) {
-	ctx, cancel := applicationDB.NewDBContext(5 * time.Second)
+	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := applicationDB.ConnectToDB()

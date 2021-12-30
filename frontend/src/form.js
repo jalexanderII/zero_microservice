@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CreateRealtorRequest, Realtor } from './proto/realtor_pb'
-import { ListingsClient } from './proto/listings_grpc_web_pb'
+import { CreateRealtorRequest, Realtor } from './proto/listings/realtor_pb'
+import { ListingsClient } from './proto/listings/listings_grpc_web_pb'
 
 var FeedbackForm = function () {
     const [id, setId] = useState('')

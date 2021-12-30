@@ -24,13 +24,12 @@ func main() {
 		panic(err)
 	}
 
-	db, err := fileServiceDB.InitiateMongoClient()
-	if err != nil {
-		l.Error("failed to connect to DB", "error", err)
-		panic(err)
-	}
+	db := fileServiceDB.InitiateMongoClient()
+
 	grpcServer := grpc.NewServer()
 	fileServicePB.RegisterFileServiceServer(grpcServer, server.NewFileServiceServer(db, l))
+	methods := config.ListGRPCResources(grpcServer)
+	l.Info("Methods on this server", "methods", methods)
 
 	// register the reflection service which allows clients to determine the methods
 	// for this gRPC service

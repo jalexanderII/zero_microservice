@@ -9,8 +9,12 @@ import (
 	config "github.com/jalexanderII/zero_microservice"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/application/server"
+	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
+	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
+	authServer "github.com/jalexanderII/zero_microservice/backend/services/users/server"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
+	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -31,12 +35,23 @@ func main() {
 	}
 	defer conn.Close()
 
+	jwtManager := middleware.NewJWTManager(config.JWTSecret, config.TokenDuration)
+	interceptor := middleware.NewAuthInterceptor(jwtManager, config.AccessibleRoles())
+
 	db, err := applicationDB.ConnectToDB()
 	appDB := applicationDB.NewApplicationDB(db)
 	fileServiceClient := fileServicePB.NewFileServiceClient(conn)
 
-	grpcServer := grpc.NewServer()
+	userdb := userDB.InitiateMongoClient()
+	authSrv := authServer.NewAuthServer(userdb, jwtManager, l)
+
+	serverOptions := []grpc.ServerOption{grpc.UnaryInterceptor(interceptor.Unary())}
+	grpcServer := grpc.NewServer(serverOptions...)
+
+	userPB.RegisterAuthServiceServer(grpcServer, authSrv)
 	applicationPB.RegisterApplicationServer(grpcServer, server.NewApplicationServer(appDB, fileServiceClient, l))
+	methods := config.ListGRPCResources(grpcServer)
+	l.Info("Methods on this server", "methods", methods)
 
 	// register the reflection service which allows clients to determine the methods
 	// for this gRPC service

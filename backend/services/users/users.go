@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	config "github.com/jalexanderII/zero_microservice"
 	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
+	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
 	"github.com/jalexanderII/zero_microservice/backend/services/users/server"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"google.golang.org/grpc"
@@ -23,11 +24,13 @@ func main() {
 		panic(err)
 	}
 
-	db := userDB.ConnectToDB()
-	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
+	db := userDB.InitiateMongoClient()
+	jwtManager := middleware.NewJWTManager(config.JWTSecret, config.TokenDuration)
 
 	grpcServer := grpc.NewServer()
-	userPB.RegisterAuthServiceServer(grpcServer, server.NewServer(userCollection))
+	userPB.RegisterAuthServiceServer(grpcServer, server.NewAuthServer(db, jwtManager, l))
+	methods := config.ListGRPCResources(grpcServer)
+	l.Info("Methods on this server", "methods", methods)
 
 	// register the reflection service which allows clients to determine the methods
 	// for this gRPC service
