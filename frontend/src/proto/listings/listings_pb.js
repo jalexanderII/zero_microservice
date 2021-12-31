@@ -21,5 +21,7 @@ var building_pb = require('./building_pb.js');
 goog.object.extend(proto, building_pb);
 var realtor_pb = require('./realtor_pb.js');
 goog.object.extend(proto, realtor_pb);
+var owner_pb = require('./owner_pb.js');
+goog.object.extend(proto, owner_pb);
 var content_pb = require('./content_pb.js');
 goog.object.extend(proto, content_pb);

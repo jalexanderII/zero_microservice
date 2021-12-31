@@ -34,7 +34,7 @@ func (s listingsServer) CreateBuilding(ctx context.Context, in *listingsPB.Creat
 		Description:  sql.NullString{String: buildingpb.Description, Valid: true},
 		Amenities:    buildingpb.Amenities,
 		UploadIds:    buildingpb.UploadIds,
-		RealtorID:    buildingpb.RealtorRef,
+		OwnerID:      buildingpb.OwnerRef,
 	})
 	if err != nil {
 		s.l.Error("[DB] Error creating building", "error", err)
@@ -84,7 +84,7 @@ func (s listingsServer) UpdateBuilding(ctx context.Context, in *listingsPB.Updat
 		Description:  sql.NullString{String: buildingpb.Description, Valid: true},
 		Amenities:    buildingpb.Amenities,
 		UploadIds:    buildingpb.UploadIds,
-		RealtorID:    buildingpb.RealtorRef,
+		OwnerID:      buildingpb.OwnerRef,
 	})
 	if err != nil {
 		s.l.Error("[DB] Error updating building", "error", err)
@@ -124,6 +124,6 @@ func BuildingDBtoPB(building genDB.Building) *listingsPB.Building {
 		Description:  building.Description.String,
 		Amenities:    building.Amenities,
 		UploadIds:    building.UploadIds,
-		RealtorRef:   building.RealtorID,
+		OwnerRef:     building.OwnerID,
 	}
 }

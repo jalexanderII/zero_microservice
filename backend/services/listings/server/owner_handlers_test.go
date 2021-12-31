@@ -9,7 +9,7 @@ import (
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 )
 
-func Test_listingsServer_CreateRealtor(t *testing.T) {
+func Test_listingsServer_CreateOwner(t *testing.T) {
 	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
@@ -17,7 +17,7 @@ func Test_listingsServer_CreateRealtor(t *testing.T) {
 	listingDB := listingsDB.NewListingsDB(db)
 	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
-	in := &listingsPB.Realtor{
+	in := &listingsPB.Owner{
 		Name:        "Fitore Abazaga",
 		Email:       "f.abazaga@platinum.com",
 		PhoneNumber: "(646) 339-3247",
@@ -25,16 +25,16 @@ func Test_listingsServer_CreateRealtor(t *testing.T) {
 		UserRef:     1,
 	}
 
-	realtor, err := server.CreateRealtor(ctx, &listingsPB.CreateRealtorRequest{Realtor: in})
+	owner, err := server.CreateOwner(ctx, &listingsPB.CreateOwnerRequest{Owner: in})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtor.Name != in.Name {
-		t.Errorf("1: An error creating a realtor: %+v", realtor)
+	if owner.Name != in.Name {
+		t.Errorf("1: An error creating a owner: %+v", owner)
 	}
 }
 
-func Test_listingsServer_GetRealtor(t *testing.T) {
+func Test_listingsServer_GetOwner(t *testing.T) {
 	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
@@ -42,16 +42,16 @@ func Test_listingsServer_GetRealtor(t *testing.T) {
 	listingDB := listingsDB.NewListingsDB(db)
 	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
-	realtor, err := server.GetRealtor(ctx, &listingsPB.GetRealtorRequest{Id: 1})
+	owner, err := server.GetOwner(ctx, &listingsPB.GetOwnerRequest{Id: 1})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtor.Name != "Fitore Abazaga" {
-		t.Errorf("2: Failed to fetch correct realtor: %+v", realtor)
+	if owner.Name != "Fitore Abazaga" {
+		t.Errorf("2: Failed to fetch correct owner: %+v", owner)
 	}
 }
 
-func Test_listingsServer_ListRealtors(t *testing.T) {
+func Test_listingsServer_ListOwners(t *testing.T) {
 	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
@@ -59,23 +59,23 @@ func Test_listingsServer_ListRealtors(t *testing.T) {
 	listingDB := listingsDB.NewListingsDB(db)
 	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
-	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
+	owners, err := server.ListOwners(ctx, &listingsPB.ListOwnerRequest{})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if len(realtors.Realtors) < 1 {
-		t.Errorf("2: Failed to fetch realtors: %+v", realtors.Realtors[0])
+	if len(owners.Owners) < 1 {
+		t.Errorf("2: Failed to fetch owners: %+v", owners.Owners[0])
 	}
 }
 
-func Test_listingsServer_UpdateRealtor(t *testing.T) {
+func Test_listingsServer_UpdateOwner(t *testing.T) {
 	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
 	db, _ := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
 	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
-	in := &listingsPB.Realtor{
+	in := &listingsPB.Owner{
 		Id:          1,
 		Name:        "Fitore Abazaga",
 		Email:       "f.abazaga@gmail.com",
@@ -83,16 +83,16 @@ func Test_listingsServer_UpdateRealtor(t *testing.T) {
 		Company:     "Platinum Properties",
 		UserRef:     1,
 	}
-	realtor, err := server.UpdateRealtor(ctx, &listingsPB.UpdateRealtorRequest{Id: 1, Realtor: in})
+	owner, err := server.UpdateOwner(ctx, &listingsPB.UpdateOwnerRequest{Id: 1, Owner: in})
 	if err != nil {
 		t.Errorf("1: An error was returned: %v", err)
 	}
-	if realtor.Email != in.Email {
-		t.Errorf("2: Failed to fetch correct realtor: %+v", realtor)
+	if owner.Email != in.Email {
+		t.Errorf("2: Failed to fetch correct owner: %+v", owner)
 	}
 }
 
-func Test_listingsServer_DeleteRealtor(t *testing.T) {
+func Test_listingsServer_DeleteOwner(t *testing.T) {
 	ctx, cancel := config.NewDBContext(5 * time.Second)
 	defer cancel()
 
@@ -100,30 +100,30 @@ func Test_listingsServer_DeleteRealtor(t *testing.T) {
 	listingDB := listingsDB.NewListingsDB(db)
 	server := listingsServer{DB: listingDB, FileServiceClient: MockFileServiceClient(), l: L}
 
-	in := &listingsPB.Realtor{
+	in := &listingsPB.Owner{
 		Name:        "to_delete",
 		Email:       "to_delete",
 		PhoneNumber: "to_delete",
 		Company:     "to_delete",
 		UserRef:     1,
 	}
-	realtor, err := server.CreateRealtor(ctx, &listingsPB.CreateRealtorRequest{Realtor: in})
+	owner, err := server.CreateOwner(ctx, &listingsPB.CreateOwnerRequest{Owner: in})
 	if err != nil {
-		t.Errorf("1: An error was returned creating a temp realtor: %v", err)
+		t.Errorf("1: An error was returned creating a temp owner: %v", err)
 	}
-	realtors, err := server.ListRealtors(ctx, &listingsPB.ListRealtorRequest{})
+	owners, err := server.ListOwners(ctx, &listingsPB.ListOwnerRequest{})
 	if err != nil {
 		t.Errorf("2: An error was returned: %v", err)
 	}
-	if len(realtors.Realtors) < 2 {
-		t.Errorf("3: An error adding a temp realtor, number of realtors in DB: %v", len(realtors.Realtors))
+	if len(owners.Owners) < 2 {
+		t.Errorf("3: An error adding a temp owner, number of owners in DB: %v", len(owners.Owners))
 	}
 
-	deleted, err := server.DeleteRealtor(ctx, &listingsPB.DeleteRealtorRequest{Id: realtor.Id})
+	deleted, err := server.DeleteOwner(ctx, &listingsPB.DeleteOwnerRequest{Id: owner.Id})
 	if err != nil {
 		t.Errorf("4: An error was returned: %v", err)
 	}
 	if deleted.Status != listingsPB.STATUS_SUCCESS {
-		t.Errorf("5: Failed to delete realtor: %+v\n, %+v", deleted.Status, deleted.GetRealtor())
+		t.Errorf("5: Failed to delete owner: %+v\n, %+v", deleted.Status, deleted.GetOwner())
 	}
 }

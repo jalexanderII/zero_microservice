@@ -99,7 +99,7 @@ INSERT INTO buildings (name,
                        description,
                        amenities,
                        upload_ids,
-                       realtor_id)
+                       owner_id)
 VALUES ($1,
         $2,
         $3,
@@ -139,7 +139,7 @@ SET name         = $2,
     description= $11,
     amenities= $12,
     upload_ids= $13,
-    realtor_id= $14
+    owner_id= $14
 WHERE building_id = $1;
 
 -- name: DeleteBuilding :exec
@@ -149,13 +149,15 @@ WHERE building_id = $1;
 
 -- name: CreateRealtor :one
 INSERT INTO realtors (name,
+                      user_id,
                       email,
                       phone_number,
                       company)
 VALUES ($1,
         $2,
         $3,
-        $4)
+        $4,
+        $5)
 RETURNING *;
 
 -- name: GetRealtor :one
@@ -180,6 +182,42 @@ WHERE realtor_id = $1;
 DELETE
 FROM realtors
 WHERE realtor_id = $1;
+
+-- name: CreateOwner :one
+INSERT INTO owners (name,
+                    user_id,
+                    email,
+                    phone_number,
+                    company)
+VALUES ($1,
+        $2,
+        $3,
+        $4,
+        $5)
+RETURNING *;
+
+-- name: GetOwner :one
+SELECT *
+FROM owners
+WHERE owner_id = $1;
+
+-- name: ListOwners :many
+SELECT *
+FROM owners
+ORDER BY owner_id;
+
+-- name: UpdateOwner :exec
+UPDATE owners
+SET name        = $2,
+    email       = $3,
+    phone_number= $4,
+    company= $5
+WHERE owner_id = $1;
+
+-- name: DeleteOwner :exec
+DELETE
+FROM owners
+WHERE owner_id = $1;
 
 -- name: AppendContentApartment :exec
 UPDATE apartments

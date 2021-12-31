@@ -22,6 +22,8 @@ var building_pb = require('./building_pb.js')
 
 var realtor_pb = require('./realtor_pb.js')
 
+var owner_pb = require('./owner_pb.js')
+
 var content_pb = require('./content_pb.js')
 const proto = {};
 proto.listings = require('./listings_pb.js');
@@ -1051,6 +1053,311 @@ proto.listings.ListingsPromiseClient.prototype.deleteRealtor =
       request,
       metadata || {},
       methodDescriptor_Listings_DeleteRealtor);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.listings.CreateOwnerRequest,
+ *   !proto.listings.Owner>}
+ */
+const methodDescriptor_Listings_CreateOwner = new grpc.web.MethodDescriptor(
+  '/listings.Listings/CreateOwner',
+  grpc.web.MethodType.UNARY,
+  owner_pb.CreateOwnerRequest,
+  owner_pb.Owner,
+  /**
+   * @param {!proto.listings.CreateOwnerRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  owner_pb.Owner.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.listings.CreateOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.listings.Owner)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.listings.Owner>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.listings.ListingsClient.prototype.createOwner =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/listings.Listings/CreateOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_CreateOwner,
+      callback);
+};
+
+
+/**
+ * @param {!proto.listings.CreateOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.listings.Owner>}
+ *     Promise that resolves to the response
+ */
+proto.listings.ListingsPromiseClient.prototype.createOwner =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/listings.Listings/CreateOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_CreateOwner);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.listings.GetOwnerRequest,
+ *   !proto.listings.Owner>}
+ */
+const methodDescriptor_Listings_GetOwner = new grpc.web.MethodDescriptor(
+  '/listings.Listings/GetOwner',
+  grpc.web.MethodType.UNARY,
+  owner_pb.GetOwnerRequest,
+  owner_pb.Owner,
+  /**
+   * @param {!proto.listings.GetOwnerRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  owner_pb.Owner.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.listings.GetOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.listings.Owner)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.listings.Owner>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.listings.ListingsClient.prototype.getOwner =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/listings.Listings/GetOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_GetOwner,
+      callback);
+};
+
+
+/**
+ * @param {!proto.listings.GetOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.listings.Owner>}
+ *     Promise that resolves to the response
+ */
+proto.listings.ListingsPromiseClient.prototype.getOwner =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/listings.Listings/GetOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_GetOwner);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.listings.ListOwnerRequest,
+ *   !proto.listings.ListOwnerResponse>}
+ */
+const methodDescriptor_Listings_ListOwners = new grpc.web.MethodDescriptor(
+  '/listings.Listings/ListOwners',
+  grpc.web.MethodType.UNARY,
+  owner_pb.ListOwnerRequest,
+  owner_pb.ListOwnerResponse,
+  /**
+   * @param {!proto.listings.ListOwnerRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  owner_pb.ListOwnerResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.listings.ListOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.listings.ListOwnerResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.listings.ListOwnerResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.listings.ListingsClient.prototype.listOwners =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/listings.Listings/ListOwners',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_ListOwners,
+      callback);
+};
+
+
+/**
+ * @param {!proto.listings.ListOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.listings.ListOwnerResponse>}
+ *     Promise that resolves to the response
+ */
+proto.listings.ListingsPromiseClient.prototype.listOwners =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/listings.Listings/ListOwners',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_ListOwners);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.listings.UpdateOwnerRequest,
+ *   !proto.listings.Owner>}
+ */
+const methodDescriptor_Listings_UpdateOwner = new grpc.web.MethodDescriptor(
+  '/listings.Listings/UpdateOwner',
+  grpc.web.MethodType.UNARY,
+  owner_pb.UpdateOwnerRequest,
+  owner_pb.Owner,
+  /**
+   * @param {!proto.listings.UpdateOwnerRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  owner_pb.Owner.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.listings.UpdateOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.listings.Owner)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.listings.Owner>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.listings.ListingsClient.prototype.updateOwner =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/listings.Listings/UpdateOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_UpdateOwner,
+      callback);
+};
+
+
+/**
+ * @param {!proto.listings.UpdateOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.listings.Owner>}
+ *     Promise that resolves to the response
+ */
+proto.listings.ListingsPromiseClient.prototype.updateOwner =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/listings.Listings/UpdateOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_UpdateOwner);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.listings.DeleteOwnerRequest,
+ *   !proto.listings.DeleteOwnerResponse>}
+ */
+const methodDescriptor_Listings_DeleteOwner = new grpc.web.MethodDescriptor(
+  '/listings.Listings/DeleteOwner',
+  grpc.web.MethodType.UNARY,
+  owner_pb.DeleteOwnerRequest,
+  owner_pb.DeleteOwnerResponse,
+  /**
+   * @param {!proto.listings.DeleteOwnerRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  owner_pb.DeleteOwnerResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.listings.DeleteOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.listings.DeleteOwnerResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.listings.DeleteOwnerResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.listings.ListingsClient.prototype.deleteOwner =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/listings.Listings/DeleteOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_DeleteOwner,
+      callback);
+};
+
+
+/**
+ * @param {!proto.listings.DeleteOwnerRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.listings.DeleteOwnerResponse>}
+ *     Promise that resolves to the response
+ */
+proto.listings.ListingsPromiseClient.prototype.deleteOwner =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/listings.Listings/DeleteOwner',
+      request,
+      metadata || {},
+      methodDescriptor_Listings_DeleteOwner);
 };
 
 

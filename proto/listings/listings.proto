@@ -6,6 +6,7 @@ option go_package = "./proto;listings";
 import "apartment.proto";
 import "building.proto";
 import "realtor.proto";
+import "owner.proto";
 import "content.proto";
 
 service Listings {
@@ -28,6 +29,12 @@ service Listings {
   rpc ListRealtors(ListRealtorRequest) returns (ListRealtorResponse);
   rpc UpdateRealtor(UpdateRealtorRequest) returns (Realtor);
   rpc DeleteRealtor(DeleteRealtorRequest) returns (DeleteRealtorResponse);
+  // CRUD owner functions
+  rpc CreateOwner(CreateOwnerRequest) returns (Owner);
+  rpc GetOwner(GetOwnerRequest) returns (Owner);
+  rpc ListOwners(ListOwnerRequest) returns (ListOwnerResponse);
+  rpc UpdateOwner(UpdateOwnerRequest) returns (Owner);
+  rpc DeleteOwner(DeleteOwnerRequest) returns (DeleteOwnerResponse);
   // Call to FileService to upload documents
   rpc Upload(FileUploadRequest) returns (FileUploadResponse);
 }

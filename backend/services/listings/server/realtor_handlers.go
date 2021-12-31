@@ -13,6 +13,7 @@ func (s listingsServer) CreateRealtor(ctx context.Context, in *listingsPB.Create
 	var realtorpb = in.Realtor
 	realtor, err := s.DB.CreateRealtor(ctx, genDB.CreateRealtorParams{
 		Name:        realtorpb.Name,
+		UserID:      realtorpb.UserRef,
 		Email:       sql.NullString{String: realtorpb.Email, Valid: true},
 		PhoneNumber: sql.NullString{String: realtorpb.PhoneNumber, Valid: true},
 		Company:     sql.NullString{String: realtorpb.Company, Valid: true},
@@ -84,6 +85,7 @@ func (s listingsServer) DeleteRealtor(ctx context.Context, in *listingsPB.Delete
 func RealtorDBtoPB(realtor genDB.Realtor) *listingsPB.Realtor {
 	return &listingsPB.Realtor{
 		Id:          realtor.RealtorID,
+		UserRef:     realtor.UserID,
 		Name:        realtor.Name,
 		Email:       realtor.Email.String,
 		PhoneNumber: realtor.PhoneNumber.String,

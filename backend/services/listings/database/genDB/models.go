@@ -48,12 +48,23 @@ type Building struct {
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
-	RealtorID    int32          `json:"realtor_id"`
+	OwnerID      int32          `json:"owner_id"`
 	CreatedAt    time.Time      `json:"created_at"`
+}
+
+type Owner struct {
+	OwnerID     int32          `json:"owner_id"`
+	UserID      int32          `json:"user_id"`
+	Name        string         `json:"name"`
+	Email       sql.NullString `json:"email"`
+	PhoneNumber sql.NullString `json:"phone_number"`
+	Company     sql.NullString `json:"company"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type Realtor struct {
 	RealtorID   int32          `json:"realtor_id"`
+	UserID      int32          `json:"user_id"`
 	Name        string         `json:"name"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`

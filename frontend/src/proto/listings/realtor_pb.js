@@ -231,7 +231,8 @@ proto.listings.Realtor.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 2, ""),
     email: jspb.Message.getFieldWithDefault(msg, 3, ""),
     phoneNumber: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    company: jspb.Message.getFieldWithDefault(msg, 5, "")
+    company: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    userRef: jspb.Message.getFieldWithDefault(msg, 6, 0)
   };
 
   if (includeInstance) {
@@ -287,6 +288,10 @@ proto.listings.Realtor.deserializeBinaryFromReader = function(msg, reader) {
     case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setCompany(value);
+      break;
+    case 6:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setUserRef(value);
       break;
     default:
       reader.skipField();
@@ -349,6 +354,13 @@ proto.listings.Realtor.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       5,
+      f
+    );
+  }
+  f = message.getUserRef();
+  if (f !== 0) {
+    writer.writeInt32(
+      6,
       f
     );
   }
@@ -442,6 +454,24 @@ proto.listings.Realtor.prototype.getCompany = function() {
  */
 proto.listings.Realtor.prototype.setCompany = function(value) {
   return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional int32 user_ref = 6;
+ * @return {number}
+ */
+proto.listings.Realtor.prototype.getUserRef = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.listings.Realtor} returns this
+ */
+proto.listings.Realtor.prototype.setUserRef = function(value) {
+  return jspb.Message.setProto3IntField(this, 6, value);
 };
 
 

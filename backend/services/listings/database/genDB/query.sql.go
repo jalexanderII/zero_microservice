@@ -184,7 +184,7 @@ INSERT INTO buildings (name,
                        description,
                        amenities,
                        upload_ids,
-                       realtor_id)
+                       owner_id)
 VALUES ($1,
         $2,
         $3,
@@ -198,7 +198,7 @@ VALUES ($1,
         $11,
         $12,
         $13)
-RETURNING building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id, created_at
+RETURNING building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, owner_id, created_at
 `
 
 type CreateBuildingParams struct {
@@ -214,7 +214,7 @@ type CreateBuildingParams struct {
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
-	RealtorID    int32          `json:"realtor_id"`
+	OwnerID      int32          `json:"owner_id"`
 }
 
 func (q *Queries) CreateBuilding(ctx context.Context, arg CreateBuildingParams) (Building, error) {
@@ -231,7 +231,7 @@ func (q *Queries) CreateBuilding(ctx context.Context, arg CreateBuildingParams) 
 		arg.Description,
 		pq.Array(arg.Amenities),
 		pq.Array(arg.UploadIds),
-		arg.RealtorID,
+		arg.OwnerID,
 	)
 	var i Building
 	err := row.Scan(
@@ -248,7 +248,50 @@ func (q *Queries) CreateBuilding(ctx context.Context, arg CreateBuildingParams) 
 		&i.Description,
 		pq.Array(&i.Amenities),
 		pq.Array(&i.UploadIds),
-		&i.RealtorID,
+		&i.OwnerID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createOwner = `-- name: CreateOwner :one
+INSERT INTO owners (name,
+                    user_id,
+                    email,
+                    phone_number,
+                    company)
+VALUES ($1,
+        $2,
+        $3,
+        $4,
+        $5)
+RETURNING owner_id, user_id, name, email, phone_number, company, created_at
+`
+
+type CreateOwnerParams struct {
+	Name        string         `json:"name"`
+	UserID      int32          `json:"user_id"`
+	Email       sql.NullString `json:"email"`
+	PhoneNumber sql.NullString `json:"phone_number"`
+	Company     sql.NullString `json:"company"`
+}
+
+func (q *Queries) CreateOwner(ctx context.Context, arg CreateOwnerParams) (Owner, error) {
+	row := q.db.QueryRowContext(ctx, createOwner,
+		arg.Name,
+		arg.UserID,
+		arg.Email,
+		arg.PhoneNumber,
+		arg.Company,
+	)
+	var i Owner
+	err := row.Scan(
+		&i.OwnerID,
+		&i.UserID,
+		&i.Name,
+		&i.Email,
+		&i.PhoneNumber,
+		&i.Company,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -256,18 +299,21 @@ func (q *Queries) CreateBuilding(ctx context.Context, arg CreateBuildingParams) 
 
 const createRealtor = `-- name: CreateRealtor :one
 INSERT INTO realtors (name,
+                      user_id,
                       email,
                       phone_number,
                       company)
 VALUES ($1,
         $2,
         $3,
-        $4)
-RETURNING realtor_id, name, email, phone_number, company, created_at
+        $4,
+        $5)
+RETURNING realtor_id, user_id, name, email, phone_number, company, created_at
 `
 
 type CreateRealtorParams struct {
 	Name        string         `json:"name"`
+	UserID      int32          `json:"user_id"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`
 	Company     sql.NullString `json:"company"`
@@ -276,6 +322,7 @@ type CreateRealtorParams struct {
 func (q *Queries) CreateRealtor(ctx context.Context, arg CreateRealtorParams) (Realtor, error) {
 	row := q.db.QueryRowContext(ctx, createRealtor,
 		arg.Name,
+		arg.UserID,
 		arg.Email,
 		arg.PhoneNumber,
 		arg.Company,
@@ -283,6 +330,7 @@ func (q *Queries) CreateRealtor(ctx context.Context, arg CreateRealtorParams) (R
 	var i Realtor
 	err := row.Scan(
 		&i.RealtorID,
+		&i.UserID,
 		&i.Name,
 		&i.Email,
 		&i.PhoneNumber,
@@ -311,6 +359,17 @@ WHERE building_id = $1
 
 func (q *Queries) DeleteBuilding(ctx context.Context, buildingID int32) error {
 	_, err := q.db.ExecContext(ctx, deleteBuilding, buildingID)
+	return err
+}
+
+const deleteOwner = `-- name: DeleteOwner :exec
+DELETE
+FROM owners
+WHERE owner_id = $1
+`
+
+func (q *Queries) DeleteOwner(ctx context.Context, ownerID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteOwner, ownerID)
 	return err
 }
 
@@ -364,7 +423,7 @@ func (q *Queries) GetApartment(ctx context.Context, apartmentID int32) (Apartmen
 }
 
 const getBuilding = `-- name: GetBuilding :one
-SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id, created_at
+SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, owner_id, created_at
 FROM buildings
 WHERE building_id = $1
 `
@@ -386,14 +445,35 @@ func (q *Queries) GetBuilding(ctx context.Context, buildingID int32) (Building, 
 		&i.Description,
 		pq.Array(&i.Amenities),
 		pq.Array(&i.UploadIds),
-		&i.RealtorID,
+		&i.OwnerID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getOwner = `-- name: GetOwner :one
+SELECT owner_id, user_id, name, email, phone_number, company, created_at
+FROM owners
+WHERE owner_id = $1
+`
+
+func (q *Queries) GetOwner(ctx context.Context, ownerID int32) (Owner, error) {
+	row := q.db.QueryRowContext(ctx, getOwner, ownerID)
+	var i Owner
+	err := row.Scan(
+		&i.OwnerID,
+		&i.UserID,
+		&i.Name,
+		&i.Email,
+		&i.PhoneNumber,
+		&i.Company,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getRealtor = `-- name: GetRealtor :one
-SELECT realtor_id, name, email, phone_number, company, created_at
+SELECT realtor_id, user_id, name, email, phone_number, company, created_at
 FROM realtors
 WHERE realtor_id = $1
 `
@@ -403,6 +483,7 @@ func (q *Queries) GetRealtor(ctx context.Context, realtorID int32) (Realtor, err
 	var i Realtor
 	err := row.Scan(
 		&i.RealtorID,
+		&i.UserID,
 		&i.Name,
 		&i.Email,
 		&i.PhoneNumber,
@@ -467,7 +548,7 @@ func (q *Queries) ListApartments(ctx context.Context) ([]Apartment, error) {
 }
 
 const listBuildings = `-- name: ListBuildings :many
-SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, realtor_id, created_at
+SELECT building_id, name, full_address, street, city, state, zip_code, neighborhood, lat, lng, description, amenities, upload_ids, owner_id, created_at
 FROM buildings
 ORDER BY building_id
 `
@@ -495,7 +576,44 @@ func (q *Queries) ListBuildings(ctx context.Context) ([]Building, error) {
 			&i.Description,
 			pq.Array(&i.Amenities),
 			pq.Array(&i.UploadIds),
-			&i.RealtorID,
+			&i.OwnerID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listOwners = `-- name: ListOwners :many
+SELECT owner_id, user_id, name, email, phone_number, company, created_at
+FROM owners
+ORDER BY owner_id
+`
+
+func (q *Queries) ListOwners(ctx context.Context) ([]Owner, error) {
+	rows, err := q.db.QueryContext(ctx, listOwners)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Owner
+	for rows.Next() {
+		var i Owner
+		if err := rows.Scan(
+			&i.OwnerID,
+			&i.UserID,
+			&i.Name,
+			&i.Email,
+			&i.PhoneNumber,
+			&i.Company,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -512,7 +630,7 @@ func (q *Queries) ListBuildings(ctx context.Context) ([]Building, error) {
 }
 
 const listRealtors = `-- name: ListRealtors :many
-SELECT realtor_id, name, email, phone_number, company, created_at
+SELECT realtor_id, user_id, name, email, phone_number, company, created_at
 FROM realtors
 ORDER BY realtor_id
 `
@@ -528,6 +646,7 @@ func (q *Queries) ListRealtors(ctx context.Context) ([]Realtor, error) {
 		var i Realtor
 		if err := rows.Scan(
 			&i.RealtorID,
+			&i.UserID,
 			&i.Name,
 			&i.Email,
 			&i.PhoneNumber,
@@ -643,7 +762,7 @@ SET name         = $2,
     description= $11,
     amenities= $12,
     upload_ids= $13,
-    realtor_id= $14
+    owner_id= $14
 WHERE building_id = $1
 `
 
@@ -661,7 +780,7 @@ type UpdateBuildingParams struct {
 	Description  sql.NullString `json:"description"`
 	Amenities    []string       `json:"amenities"`
 	UploadIds    []string       `json:"upload_ids"`
-	RealtorID    int32          `json:"realtor_id"`
+	OwnerID      int32          `json:"owner_id"`
 }
 
 func (q *Queries) UpdateBuilding(ctx context.Context, arg UpdateBuildingParams) error {
@@ -679,7 +798,35 @@ func (q *Queries) UpdateBuilding(ctx context.Context, arg UpdateBuildingParams) 
 		arg.Description,
 		pq.Array(arg.Amenities),
 		pq.Array(arg.UploadIds),
-		arg.RealtorID,
+		arg.OwnerID,
+	)
+	return err
+}
+
+const updateOwner = `-- name: UpdateOwner :exec
+UPDATE owners
+SET name        = $2,
+    email       = $3,
+    phone_number= $4,
+    company= $5
+WHERE owner_id = $1
+`
+
+type UpdateOwnerParams struct {
+	OwnerID     int32          `json:"owner_id"`
+	Name        string         `json:"name"`
+	Email       sql.NullString `json:"email"`
+	PhoneNumber sql.NullString `json:"phone_number"`
+	Company     sql.NullString `json:"company"`
+}
+
+func (q *Queries) UpdateOwner(ctx context.Context, arg UpdateOwnerParams) error {
+	_, err := q.db.ExecContext(ctx, updateOwner,
+		arg.OwnerID,
+		arg.Name,
+		arg.Email,
+		arg.PhoneNumber,
+		arg.Company,
 	)
 	return err
 }

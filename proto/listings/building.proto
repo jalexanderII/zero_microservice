@@ -20,7 +20,7 @@ message Building {
   string description = 11;
   repeated string amenities = 12;
   repeated string upload_ids = 13;
-  int32 realtor_ref = 14;
+  int32 owner_ref = 14;
 }
 
 // Service Methods

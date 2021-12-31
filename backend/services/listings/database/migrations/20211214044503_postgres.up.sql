@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS realtors
 (
     realtor_id   SERIAL PRIMARY KEY,
+    user_id      integer      NOT NULL,
     name         varchar(255) NOT NULL,
     email        text,
     phone_number text,
@@ -9,6 +10,19 @@ CREATE TABLE IF NOT EXISTS realtors
 );
 
 CREATE INDEX realtors_name_idx ON realtors (name);
+
+CREATE TABLE IF NOT EXISTS owners
+(
+    owner_id     SERIAL PRIMARY KEY,
+    user_id      integer      NOT NULL,
+    name         varchar(255) NOT NULL,
+    email        text,
+    phone_number text,
+    company      text,
+    created_at   timestamp    NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX owners_name_idx ON owners (name);
 
 CREATE TABLE IF NOT EXISTS buildings
 (
@@ -25,7 +39,7 @@ CREATE TABLE IF NOT EXISTS buildings
     description  text,
     amenities    text[],
     upload_ids   text[],
-    realtor_id   integer      NOT NULL REFERENCES realtors (realtor_id),
+    owner_id     integer      NOT NULL REFERENCES owners (owner_id),
     created_at   timestamp    NOT NULL DEFAULT NOW()
 );
 

@@ -28,7 +28,7 @@ func Test_listingsServer_CreateBuilding(t *testing.T) {
 		Description:  "Experience the best of New York’s past and present in this prewar converted building, located in the prime Financial District. 16 floors offer 30 sun-drenched loft-style apartments, each outfitted with marble baths, stainless steel appliances, high ceilings, and a washer/dryer. Ride the elevator down before heading mere blocks over to the iconic Pier 17 of South Street Seaport, FiDi’s premier waterfront destination for shopping and dining; Brookfield Place, boasting luxury retail such as Hermès, Paul Smith, and Salvatore Ferragamo and chef-driven restaurants like Le District, New York’s first and only large-format French marketplace; or Stone Street, everyone’s favorite cobblestoned strip for outdoor happy hours. With the 2,3 trains conveniently located on the corner at Fulton Street and the A,C and J,Z only two blocks away, gain unlimited access to all of New York.",
 		Amenities:    []string{"Elevator"},
 		UploadIds:    []string{},
-		RealtorRef:   1,
+		OwnerRef:     1,
 	}
 
 	building, err := server.CreateBuilding(ctx, &listingsPB.CreateBuildingRequest{Building: in})
@@ -93,7 +93,7 @@ func Test_listingsServer_UpdateBuilding(t *testing.T) {
 		Description:  "Experience the best of New York’s past and present in this prewar converted building, located in the prime Financial District. 16 floors offer 30 sun-drenched loft-style apartments, each outfitted with marble baths, stainless steel appliances, high ceilings, and a washer/dryer. Ride the elevator down before heading mere blocks over to the iconic Pier 17 of South Street Seaport, FiDi’s premier waterfront destination for shopping and dining; Brookfield Place, boasting luxury retail such as Hermès, Paul Smith, and Salvatore Ferragamo and chef-driven restaurants like Le District, New York’s first and only large-format French marketplace; or Stone Street, everyone’s favorite cobblestoned strip for outdoor happy hours. With the 2,3 trains conveniently located on the corner at Fulton Street and the A,C and J,Z only two blocks away, gain unlimited access to all of New York.",
 		Amenities:    []string{"Elevator"},
 		UploadIds:    []string{},
-		RealtorRef:   1,
+		OwnerRef:     1,
 	}
 	building, err := server.UpdateBuilding(ctx, &listingsPB.UpdateBuildingRequest{Id: 1, Building: in})
 	if err != nil {
@@ -125,7 +125,7 @@ func Test_listingsServer_DeleteBuilding(t *testing.T) {
 		Description:  "to_delete",
 		Amenities:    []string{"to_delete"},
 		UploadIds:    []string{"to_delete"},
-		RealtorRef:   1,
+		OwnerRef:     1,
 	}
 	building, err := server.CreateBuilding(ctx, &listingsPB.CreateBuildingRequest{Building: in})
 	if err != nil {

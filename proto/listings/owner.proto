@@ -6,7 +6,7 @@ option go_package = "./proto;listings";
 import "google/protobuf/field_mask.proto";
 import "content.proto";
 
-message Realtor {
+message Owner {
   int32 id = 1;
   string name = 2;
   string email = 3;
@@ -16,31 +16,31 @@ message Realtor {
 }
 
 // Service Methods
-message CreateRealtorRequest {
-  Realtor realtor = 1;
+message CreateOwnerRequest {
+  Owner owner = 1;
 }
 
-message GetRealtorRequest {
+message GetOwnerRequest {
   int32 id = 1;
 }
 
-message UpdateRealtorRequest {
+message UpdateOwnerRequest {
   int32 id = 1;
-  Realtor realtor = 2;
+  Owner owner = 2;
   google.protobuf.FieldMask mask = 3;
 }
 
-message DeleteRealtorRequest {
+message DeleteOwnerRequest {
   int32 id = 1;
 }
 
-message ListRealtorRequest {}
+message ListOwnerRequest {}
 
-message ListRealtorResponse {
-  repeated Realtor realtors = 1;
+message ListOwnerResponse {
+  repeated Owner owners = 1;
 }
 
-message DeleteRealtorResponse {
+message DeleteOwnerResponse {
   STATUS status = 1;
-  Realtor realtor = 2;
+  Owner owner = 2;
 }
