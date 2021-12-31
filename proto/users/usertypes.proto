@@ -3,6 +3,23 @@ syntax = "proto3";
 package auth;
 option go_package = "./proto;users";
 
+enum STATUS {
+  STATUS_UNKNOWN = 0;
+  PENDING = 1;
+  IN_PROGRESS = 2;
+  SUCCESS = 3;
+  FAILED = 4;
+}
+
+message Metadata {
+  oneof user_type {
+    AdminMetadata admin_metadata = 1;
+    OwnerMetadata owner_metadata = 2;
+    RealtorMetadata realtor_metadata = 3;
+    RenterMetadata renter_metadata = 4;
+  }
+}
+
 message RealtorMetadata {
   int32 id = 1;
   string name = 2;

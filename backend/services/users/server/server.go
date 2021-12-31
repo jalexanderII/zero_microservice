@@ -128,6 +128,53 @@ func (server AuthServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 // 	return user != userDB.NilUser, nil
 // }
 
+func (server AuthServer) GetUser(ctx context.Context, in *userPB.GetUserRequest) (*userPB.User, error) {
+	var user userDB.User
+	filter := bson.D{{"_id", in.GetId()}}
+	err := server.DB.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return userDBToPB(&user), nil
+}
+
+func (server AuthServer) ListUsers(ctx context.Context, in *userPB.ListUserRequest) (*userPB.ListUserResponse, error) {
+	var results []userDB.User
+	cursor, err := server.DB.Find(ctx, bson.D{})
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+	res := make([]*userPB.User, len(results))
+	for idx, user := range results {
+		res[idx] = userDBToPB(&user)
+	}
+	return &userPB.ListUserResponse{Users: res}, nil
+}
+
+func (server AuthServer) UpdateUser(ctx context.Context, in *userPB.UpdateUserRequest) (*userPB.User, error) {
+	username, email := in.GetUser().GetUsername(), in.GetUser().GetEmail()
+	filter := bson.D{{"_id", in.GetId()}}
+	update := bson.D{{"$set", bson.D{{"username", username}, {"email", email}}}}
+	_, err := server.DB.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+	var user userDB.User
+	err = server.DB.FindOne(ctx, filter).Decode(&user)
+	return userDBToPB(&user), nil
+}
+
+func (server AuthServer) DeleteUser(ctx context.Context, in *userPB.DeleteUserRequest) (*userPB.DeleteUserResponse, error) {
+	filter := bson.D{{"_id", in.GetId()}}
+	_, err := server.DB.DeleteOne(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	var user userDB.User
+	err = server.DB.FindOne(ctx, filter).Decode(&user)
+	return &userPB.DeleteUserResponse{Status: userPB.STATUS_SUCCESS, User: userDBToPB(&user)}, nil
+}
+
 func (server AuthServer) createUserFromMetadata(ctx context.Context, md *userPB.Metadata, userID string) (int32, error) {
 	switch userType := md.UserType.(type) {
 	case *userPB.Metadata_AdminMetadata:
@@ -162,5 +209,14 @@ func (server AuthServer) createUserFromMetadata(ctx context.Context, md *userPB.
 		return realtor.GetId(), nil
 	default:
 		return 0, fmt.Errorf("[Error] incorrect user type: %v", userType)
+	}
+}
+
+func userDBToPB(user *userDB.User) *userPB.User {
+	return &userPB.User{
+		Id:       user.ID.Hex(),
+		Username: user.Username,
+		Email:    user.Email,
+		Password: user.Password,
 	}
 }

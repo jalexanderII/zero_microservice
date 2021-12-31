@@ -3,11 +3,16 @@ syntax = "proto3";
 package auth;
 option go_package = "./proto;users";
 
+import "users.proto";
 import "usertypes.proto";
 
 service AuthService{
   rpc Login(LoginRequest) returns (AuthResponse);
   rpc SignUp(SignupRequest) returns (AuthResponse);
+  rpc GetUser(GetUserRequest) returns (User);
+  rpc ListUsers(ListUserRequest) returns (ListUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (User);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 }
 
 message LoginRequest {
@@ -27,11 +32,3 @@ message SignupRequest {
   Metadata metadata = 5;
 }
 
-message Metadata {
-  oneof user_type {
-    AdminMetadata admin_metadata = 1;
-    OwnerMetadata owner_metadata = 2;
-    RealtorMetadata realtor_metadata = 3;
-    RenterMetadata renter_metadata = 4;
-  }
-}
