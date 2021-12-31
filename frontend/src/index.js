@@ -11,12 +11,16 @@ import {
 import Listings from "./routes/listings";
 import Login from "./routes/login";
 import SignUp from "./routes/signup";
+import CreateRealtor from "./routes/form";
+import ListApartments from "./routes/apartments";
 
 ReactDOM.render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />}>
         <Route path="listings" element={<Listings />} />
+        <Route path="apartments" element={<ListApartments />} />
+        <Route path="form" element={<CreateRealtor />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
       </Route>

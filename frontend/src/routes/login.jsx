@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getAuthServiceClient } from "../clients";
+import { Styles, getAuthServiceClient } from "../clients";
 import { LoginRequest } from '../proto/users/auth_pb'
 
 let authServiceClient = getAuthServiceClient();
@@ -22,11 +22,12 @@ export default function Login() {
             } else {
                 console.log(resp.toObject());
                 token = resp.getToken()
-                localStorage.setItem('token', resp.getToken())
+                localStorage.setItem('token', token)
             }
         })
     }
     return (
+        <Styles>
         <form onSubmit={handleSubmit}>
             <label htmlFor="username">Username / E-Mail</label>
             <textarea
@@ -44,10 +45,6 @@ export default function Login() {
             <br />
             <button type="submit">Submit!</button>
         </form>
+        </Styles>
     )
 }
-
-export function getTokenFromLogin() {
-  return token;
-}
-

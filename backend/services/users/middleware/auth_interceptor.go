@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	"log"
 
+	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -14,11 +14,12 @@ import (
 type AuthInterceptor struct {
 	jwtManager      *JWTManager
 	accessibleRoles map[string]map[string]bool
+	l               hclog.Logger
 }
 
 // NewAuthInterceptor returns a new auth interceptor
-func NewAuthInterceptor(jwtManager *JWTManager, accessibleRoles map[string]map[string]bool) *AuthInterceptor {
-	return &AuthInterceptor{jwtManager, accessibleRoles}
+func NewAuthInterceptor(jwtManager *JWTManager, accessibleRoles map[string]map[string]bool, l hclog.Logger) *AuthInterceptor {
+	return &AuthInterceptor{jwtManager, accessibleRoles, l}
 }
 
 // Unary returns a server interceptor function to authenticate and authorize unary RPC
@@ -29,7 +30,7 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-		log.Println("--> unary interceptor: ", info.FullMethod)
+		interceptor.l.Debug("--> unary interceptor: ", info.FullMethod)
 
 		err := interceptor.authorize(ctx, info.FullMethod)
 		if err != nil {
@@ -48,13 +49,14 @@ func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string
 	}
 
 	md, ok := metadata.FromIncomingContext(ctx)
+	interceptor.l.Debug("Meta data from client: ", md)
 	if !ok {
 		return status.Errorf(codes.Unauthenticated, "metadata is not provided")
 	}
 
 	values := md["authorization"]
 	if len(values) == 0 {
-		return status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+		return status.Errorf(codes.Unauthenticated, "authorization token is not provided", md)
 	}
 
 	accessToken := values[0]

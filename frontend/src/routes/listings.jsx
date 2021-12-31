@@ -1,44 +1,40 @@
 import React, { Component } from 'react';
 import logo from '../logo.svg';
 import '../App.css';
-import { GetApartmentRequest, ListApartmentRequest } from '../proto/listings/apartment_pb'
-import { FeedbackForm } from '../form'
+import { GetApartmentRequest } from '../proto/listings/apartment_pb'
 import { getListingsClient } from "../clients";
 
 const srv = getListingsClient()
 
 class Listings extends Component  {
-  state = {
-    resp: null,
-    listResult: [],
+  constructor(props) {
+    super(props);
+    this.state = {
+      resp: null,
+      value: '',
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
   }
 
   GA = () => {
     const req = new GetApartmentRequest()
-    req.setId(1)
-    srv.getApartment(req, {}, (err, resp) => {
-      if (err) {
-        console.log(err.code);
-        console.log(err.message);
-      } else {
-        console.log(resp.toObject());
-      }
+    req.setId(this.state.value)
+    srv.getApartment(req, {}).then((resp) => {
+      console.log(resp.toObject());
       this.setState({ rent: resp.getRent() })
       this.setState({ fullAddress: resp.getFullAddress() })
     })
   }
 
-  LA = () => {
-    const listReq = new ListApartmentRequest()
-    srv.listApartments(listReq, {}, (err, result) => {
-      if (err) {
-        console.log(err.code);
-        console.log(err.message);
-      } else {
-        console.log(result.toObject());
-        this.setState({ listResult: result.getApartmentsList() })
-      }
-    })
+  handleSubmit(event) {
+    this.GA()
+    event.preventDefault();
   }
 
   render() {
@@ -49,11 +45,14 @@ class Listings extends Component  {
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
-            <FeedbackForm />
-            <button onClick={this.GA}>Get Apartment</button>
-              <div>Apartmnet:{this.state.fullAddress} with rent of {this.state.rent}</div>
-            <button onClick={this.LA}>Apartment List</button>
-            {this.state.listResult.map(i => (<li key="{i.getId()}">{i.getFullAddress()} costs: {i.getRent()}</li>))}
+          <form onSubmit={this.handleSubmit}>
+          <label>
+            Apartment ID:
+          <input type="text" value={this.state.value} onChange={this.handleChange} />
+          </label>
+          <input type="submit" value="Submit" />
+          </form>
+              {this.state.rent > 0 && <h3>Apartmnet:{this.state.fullAddress} with rent of {this.state.rent}</h3> }
         </header>
       </div>
     );

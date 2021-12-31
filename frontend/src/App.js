@@ -15,6 +15,8 @@ export default function App() {
         }}
       >
         <Link to="/listings">Listings</Link> | {" "}
+          <Link to="/apartments">Get Apartments</Link> | {" "}
+          <Link to="/form">Create Realtor</Link> | {" "}
           <Link to="/login">Login</Link> | {" "}
           <Link to="/signup">Sign Up</Link>
       </nav>

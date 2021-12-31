@@ -56,28 +56,28 @@ func (server AuthServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 	if !match {
 		return nil, errors.New("email validation failed")
 	}
-	res, err := UsernameUsed(ctx, server.DB, username)
-	if err != nil {
-		log.Printf("Error returned from UsernameUsed: %v\n", err)
-		return nil, err
-	}
-	if res {
-		return nil, errors.New("username already taken")
-	}
 
-	res, err = EmailUsed(ctx, server.DB, email)
-	if err != nil {
-		log.Printf("Error returned from EmailUsed: %v\n", err)
-		return nil, err
-	}
-	if res {
-		return nil, errors.New("email already used")
-	}
+	// res, err := server.UsernameUsed(ctx, username)
+	// if err != nil {
+	// 	log.Printf("Error returned from UsernameUsed: %v\n", err)
+	// 	return nil, err
+	// }
+	// if res {
+	// 	return nil, errors.New("username already taken")
+	// }
+	// res, err = server.EmailUsed(ctx, email)
+	// if err != nil {
+	// 	log.Printf("Error returned from EmailUsed: %v\n", err)
+	// 	return nil, err
+	// }
+	// if res {
+	// 	return nil, errors.New("email already used")
+	// }
 
 	pw, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	newUser := userDB.User{ID: primitive.NewObjectID(), Email: email, Username: username, Password: string(pw), Role: userDB.Role(role)}
 
-	_, err = server.DB.InsertOne(ctx, newUser)
+	_, err := server.DB.InsertOne(ctx, newUser)
 	if err != nil {
 		log.Printf("Error inserting new user: %v\n", err)
 		return nil, err
@@ -91,28 +91,29 @@ func (server AuthServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 	return &userPB.AuthResponse{Token: token}, nil
 }
 
-func EmailUsed(ctx context.Context, DB mongo.Collection, email string) (bool, error) {
-	var result userDB.User
-	err := DB.FindOne(ctx, bson.M{"email": email}).Decode(&result)
-	if err != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection.
-		if err == mongo.ErrNoDocuments {
-			return true, fmt.Errorf("not found: %v", err)
-		}
-		return true, fmt.Errorf("error fetching email: %v", err)
-	}
-	return result != userDB.NilUser, nil
-}
+// func (server AuthServer) EmailUsed(ctx context.Context, email string) (bool, error) {
+// 	var user userDB.User
+// 	err := server.DB.FindOne(ctx, bson.M{"$or": []bson.M{{"username": email}, {"email": email}}}).Decode(&user)
+// 	if err != nil {
+// 		// ErrNoDocuments means that the filter did not match any documents in the collection.
+// 		if err == mongo.ErrNoDocuments {
+// 			return true, fmt.Errorf("not found: %v", err)
+// 		}
+// 		return true, fmt.Errorf("error fetching email: %v", err)
+// 	}
+// 	return user != userDB.NilUser, nil
+// }
 
-func UsernameUsed(ctx context.Context, DB mongo.Collection, username string) (bool, error) {
-	var result userDB.User
-	err := DB.FindOne(ctx, bson.M{"username": username}).Decode(&result)
-	if err != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection.
-		if err == mongo.ErrNoDocuments {
-			return true, fmt.Errorf("not found: %v", err)
-		}
-		return true, fmt.Errorf("error fetching username: %v", err)
-	}
-	return result != userDB.NilUser, nil
-}
+//
+// func (server AuthServer) UsernameUsed(ctx context.Context, username string) (bool, error) {
+// 	var user userDB.User
+// 	err := server.DB.FindOne(ctx, bson.M{"$or": []bson.M{{"username": username}, {"email": username}}}).Decode(&user)
+// 	if err != nil {
+// 		// ErrNoDocuments means that the filter did not match any documents in the collection.
+// 		if err == mongo.ErrNoDocuments {
+// 			return true, fmt.Errorf("not found: %v", err)
+// 		}
+// 		return true, fmt.Errorf("error fetching username: %v", err)
+// 	}
+// 	return user != userDB.NilUser, nil
+// }

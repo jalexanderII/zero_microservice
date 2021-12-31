@@ -24,11 +24,12 @@ func main() {
 		panic(err)
 	}
 
-	db := userDB.InitiateMongoClient()
+	DB := userDB.InitiateMongoClient()
+	userCollection := *DB.Collection(config.USERCOLLECTIONNAME)
 	jwtManager := middleware.NewJWTManager(config.JWTSecret, config.TokenDuration)
 
 	grpcServer := grpc.NewServer()
-	userPB.RegisterAuthServiceServer(grpcServer, server.NewAuthServer(db, jwtManager, l))
+	userPB.RegisterAuthServiceServer(grpcServer, server.NewAuthServer(userCollection, jwtManager, l))
 	methods := config.ListGRPCResources(grpcServer)
 	l.Info("Methods on this server", "methods", methods)
 

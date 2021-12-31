@@ -1,42 +1,30 @@
 import React, { useState } from 'react';
-import { CreateRealtorRequest, Realtor } from './proto/listings/realtor_pb'
-import { ListingsClient } from './proto/listings/listings_grpc_web_pb'
+import { CreateRealtorRequest, Realtor } from '../proto/listings/realtor_pb'
+import { Styles, getListingsClient } from "../clients";
 
-var FeedbackForm = function () {
-    const [id, setId] = useState('')
+const srv = getListingsClient()
+
+export default function CreateRealtor() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [phone_number, setPhoneNumber] = useState('')
     const [company, setCompany] = useState('')
-    const srv = new ListingsClient("http://localhost:8080")
     const req = new CreateRealtorRequest()
     const R = new Realtor();
     const handleSubmit = e => {
         e.preventDefault()
-        R.setId(id)
         R.setName(name)
         R.setEmail(email)
         R.setPhoneNumber(phone_number)
         R.setCompany(company)
         req.setRealtor(R)
-        srv.createRealtor(req, {}, (err, resp) => {
-            if (err) {
-                console.log(err.code);
-                console.log(err.message);
-            } else {
-                console.log(resp.toObject());
-            }
+        srv.createRealtor(req, {}).then((resp) => {
+            console.log(resp.toObject());
         })
     }
     return (
+        <Styles>
         <form onSubmit={handleSubmit}>
-            <label htmlFor="id">Enter realtor id</label>
-            <textarea
-                name="id"
-                value={id}
-                onChange={e => setId(e.target.value)}
-            />
-            <br />
             <label htmlFor="name">Enter realtor name</label> <br />
             <input
                 name="name"
@@ -68,7 +56,6 @@ var FeedbackForm = function () {
             <br />
             <button type="submit">Submit!</button>
         </form>
+        </Styles>
     )
 }
-
-export {FeedbackForm};

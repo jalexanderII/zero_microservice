@@ -9,19 +9,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func InitiateMongoClient() mongo.Collection {
-	var err error
-	var client *mongo.Client
-	uri := config.MONGOURI
-	opts := options.Client()
-	opts.ApplyURI(uri)
-	opts.SetMaxPoolSize(5)
+func InitiateMongoClient() mongo.Database {
+	clientOptions := options.Client().ApplyURI(config.MONGOURI)
 	ctx, cancel := config.NewDBContext(10 * time.Second)
 	defer cancel()
-	if client, err = mongo.Connect(ctx, opts); err != nil {
+
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
 		log.Fatalf("Error connecting to DB: %v", err)
 	}
-	db := *client.Database(config.USERDBNAME)
-	userCollection := *db.Collection(config.USERCOLLECTIONNAME)
-	return userCollection
+	return *client.Database(config.USERDBNAME)
 }

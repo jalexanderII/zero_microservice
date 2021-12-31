@@ -40,19 +40,19 @@ func main() {
 	defer conn.Close()
 
 	jwtManager := middleware.NewJWTManager(config.JWTSecret, config.TokenDuration)
-	interceptor := middleware.NewAuthInterceptor(jwtManager, config.AccessibleRoles())
+	interceptor := middleware.NewAuthInterceptor(jwtManager, config.AccessibleRoles(), l)
 
 	db, err := listingsDB.ConnectToDB()
 	listingDB := listingsDB.NewListingsDB(db)
 	fileServiceClient := fileServicePB.NewFileServiceClient(conn)
 
 	userdb := userDB.InitiateMongoClient()
-	authSrv := authServer.NewAuthServer(userdb, jwtManager, l)
+	userCollection := *userdb.Collection(config.USERCOLLECTIONNAME)
 
 	serverOptions := []grpc.ServerOption{grpc.UnaryInterceptor(interceptor.Unary())}
 	grpcServer := grpc.NewServer(serverOptions...)
 
-	userPB.RegisterAuthServiceServer(grpcServer, authSrv)
+	userPB.RegisterAuthServiceServer(grpcServer, authServer.NewAuthServer(userCollection, jwtManager, l))
 	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, fileServiceClient, l))
 	methods := config.ListGRPCResources(grpcServer)
 	l.Info("Methods on this server", "methods", methods)
