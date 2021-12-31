@@ -9,8 +9,9 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
-	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
 	"github.com/jalexanderII/zero_microservice/config"
+	"github.com/jalexanderII/zero_microservice/config/middleware"
+	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,13 +23,14 @@ import (
 
 type AuthServer struct {
 	userPB.UnimplementedAuthServiceServer
-	DB   mongo.Collection
-	jwtm *middleware.JWTManager
-	l    hclog.Logger
+	DB             mongo.Collection
+	jwtm           *middleware.JWTManager
+	ListingsClient listingsPB.ListingsClient
+	l              hclog.Logger
 }
 
-func NewAuthServer(DB mongo.Collection, jwtm *middleware.JWTManager, l hclog.Logger) *AuthServer {
-	return &AuthServer{DB: DB, jwtm: jwtm, l: l}
+func NewAuthServer(DB mongo.Collection, jwtm *middleware.JWTManager, lc listingsPB.ListingsClient, l hclog.Logger) *AuthServer {
+	return &AuthServer{DB: DB, jwtm: jwtm, ListingsClient: lc, l: l}
 }
 
 func (server AuthServer) Login(ctx context.Context, in *userPB.LoginRequest) (*userPB.AuthResponse, error) {
@@ -38,7 +40,7 @@ func (server AuthServer) Login(ctx context.Context, in *userPB.LoginRequest) (*u
 	if err != nil {
 		return nil, fmt.Errorf("cannot find user: %v", err)
 	}
-	if user == userDB.NilUser || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+	if user.ID.IsZero() || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
 		return nil, errors.New("wrong login credentials provided")
 	}
 
@@ -83,6 +85,14 @@ func (server AuthServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 		return nil, err
 	}
 
+	newId, err := server.createUserFromMetadata(ctx, in.GetMetadata(), newUser.ID.Hex())
+	if err != nil {
+		return nil, err
+	}
+	if newId == 0 {
+		return nil, fmt.Errorf("new user not created, id is < 1 %v", newId)
+	}
+
 	token, err := server.jwtm.Generate(&newUser)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "cannot generate access token")
@@ -117,3 +127,40 @@ func (server AuthServer) SignUp(ctx context.Context, in *userPB.SignupRequest) (
 // 	}
 // 	return user != userDB.NilUser, nil
 // }
+
+func (server AuthServer) createUserFromMetadata(ctx context.Context, md *userPB.Metadata, userID string) (int32, error) {
+	switch userType := md.UserType.(type) {
+	case *userPB.Metadata_AdminMetadata:
+		return 0, nil
+	case *userPB.Metadata_RenterMetadata:
+		return 0, nil
+	case *userPB.Metadata_OwnerMetadata:
+		o := &listingsPB.Owner{
+			Name:        md.GetOwnerMetadata().GetName(),
+			Email:       md.GetOwnerMetadata().GetEmail(),
+			PhoneNumber: md.GetOwnerMetadata().GetPhoneNumber(),
+			Company:     md.GetOwnerMetadata().GetCompany(),
+			UserRef:     userID,
+		}
+		owner, err := server.ListingsClient.CreateOwner(ctx, &listingsPB.CreateOwnerRequest{Owner: o})
+		if err != nil {
+			return 0, fmt.Errorf("[Error] creating owner : %v", err)
+		}
+		return owner.GetId(), nil
+	case *userPB.Metadata_RealtorMetadata:
+		r := &listingsPB.Realtor{
+			Name:        md.GetOwnerMetadata().GetName(),
+			Email:       md.GetOwnerMetadata().GetEmail(),
+			PhoneNumber: md.GetOwnerMetadata().GetPhoneNumber(),
+			Company:     md.GetOwnerMetadata().GetCompany(),
+			UserRef:     userID,
+		}
+		realtor, err := server.ListingsClient.CreateRealtor(ctx, &listingsPB.CreateRealtorRequest{Realtor: r})
+		if err != nil {
+			return 0, fmt.Errorf("[Error] creating owner : %v", err)
+		}
+		return realtor.GetId(), nil
+	default:
+		return 0, fmt.Errorf("[Error] incorrect user type: %v", userType)
+	}
+}

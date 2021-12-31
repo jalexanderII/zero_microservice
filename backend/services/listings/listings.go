@@ -10,13 +10,10 @@ import (
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/server"
-	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
-	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
-	authServer "github.com/jalexanderII/zero_microservice/backend/services/users/server"
 	"github.com/jalexanderII/zero_microservice/config"
+	"github.com/jalexanderII/zero_microservice/config/middleware"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	"github.com/jalexanderII/zero_microservice/gen/listings"
-	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
@@ -27,7 +24,7 @@ func main() {
 	l := hclog.Default()
 	l.Debug("Listings Service")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", config.SERVERPORT))
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", config.LISTINGSERVICESERVERPORT))
 	if err != nil {
 		l.Error("failed to listen", "error", err)
 		panic(err)
@@ -46,13 +43,9 @@ func main() {
 	listingDB := listingsDB.NewListingsDB(db)
 	fileServiceClient := fileServicePB.NewFileServiceClient(conn)
 
-	userdb := userDB.InitiateMongoClient()
-	userCollection := *userdb.Collection(config.USERCOLLECTIONNAME)
-
 	serverOptions := []grpc.ServerOption{grpc.UnaryInterceptor(interceptor.Unary())}
 	grpcServer := grpc.NewServer(serverOptions...)
 
-	userPB.RegisterAuthServiceServer(grpcServer, authServer.NewAuthServer(userCollection, jwtManager, l))
 	listings.RegisterListingsServer(grpcServer, server.NewListingsServer(listingDB, fileServiceClient, l))
 	methods := config.ListGRPCResources(grpcServer)
 	l.Info("Methods on this server", "methods", methods)

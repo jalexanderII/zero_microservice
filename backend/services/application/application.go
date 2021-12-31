@@ -8,13 +8,10 @@ import (
 	"github.com/hashicorp/go-hclog"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/application/server"
-	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
-	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
-	authServer "github.com/jalexanderII/zero_microservice/backend/services/users/server"
 	"github.com/jalexanderII/zero_microservice/config"
+	"github.com/jalexanderII/zero_microservice/config/middleware"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
-	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -42,13 +39,9 @@ func main() {
 	appDB := applicationDB.NewApplicationDB(db)
 	fileServiceClient := fileServicePB.NewFileServiceClient(conn)
 
-	userdb := userDB.InitiateMongoClient()
-	userCollection := *userdb.Collection(config.USERCOLLECTIONNAME)
-
 	serverOptions := []grpc.ServerOption{grpc.UnaryInterceptor(interceptor.Unary())}
 	grpcServer := grpc.NewServer(serverOptions...)
 
-	userPB.RegisterAuthServiceServer(grpcServer, authServer.NewAuthServer(userCollection, jwtManager, l))
 	applicationPB.RegisterApplicationServer(grpcServer, server.NewApplicationServer(appDB, fileServiceClient, l))
 	methods := config.ListGRPCResources(grpcServer)
 	l.Info("Methods on this server", "methods", methods)

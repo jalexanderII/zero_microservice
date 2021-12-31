@@ -7,6 +7,7 @@ import (
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/config"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func Test_listingsServer_CreateOwner(t *testing.T) {
@@ -22,7 +23,7 @@ func Test_listingsServer_CreateOwner(t *testing.T) {
 		Email:       "f.abazaga@platinum.com",
 		PhoneNumber: "(646) 339-3247",
 		Company:     "Platinum Properties",
-		UserRef:     1,
+		UserRef:     primitive.NewObjectID().Hex(),
 	}
 
 	owner, err := server.CreateOwner(ctx, &listingsPB.CreateOwnerRequest{Owner: in})
@@ -81,7 +82,7 @@ func Test_listingsServer_UpdateOwner(t *testing.T) {
 		Email:       "f.abazaga@gmail.com",
 		PhoneNumber: "(646) 339-3247",
 		Company:     "Platinum Properties",
-		UserRef:     1,
+		UserRef:     primitive.NewObjectID().Hex(),
 	}
 	owner, err := server.UpdateOwner(ctx, &listingsPB.UpdateOwnerRequest{Id: 1, Owner: in})
 	if err != nil {
@@ -105,7 +106,7 @@ func Test_listingsServer_DeleteOwner(t *testing.T) {
 		Email:       "to_delete",
 		PhoneNumber: "to_delete",
 		Company:     "to_delete",
-		UserRef:     1,
+		UserRef:     primitive.NewObjectID().Hex(),
 	}
 	owner, err := server.CreateOwner(ctx, &listingsPB.CreateOwnerRequest{Owner: in})
 	if err != nil {

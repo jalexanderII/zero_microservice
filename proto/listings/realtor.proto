@@ -12,7 +12,7 @@ message Realtor {
   string email = 3;
   string phone_number = 4;
   string company = 5;
-  int32 user_ref = 6;
+  string user_ref = 6;
 }
 
 // Service Methods

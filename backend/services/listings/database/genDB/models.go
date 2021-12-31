@@ -54,7 +54,7 @@ type Building struct {
 
 type Owner struct {
 	OwnerID     int32          `json:"owner_id"`
-	UserID      int32          `json:"user_id"`
+	UserID      string         `json:"user_id"`
 	Name        string         `json:"name"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`
@@ -64,7 +64,7 @@ type Owner struct {
 
 type Realtor struct {
 	RealtorID   int32          `json:"realtor_id"`
-	UserID      int32          `json:"user_id"`
+	UserID      string         `json:"user_id"`
 	Name        string         `json:"name"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`

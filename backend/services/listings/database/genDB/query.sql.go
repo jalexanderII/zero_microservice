@@ -270,7 +270,7 @@ RETURNING owner_id, user_id, name, email, phone_number, company, created_at
 
 type CreateOwnerParams struct {
 	Name        string         `json:"name"`
-	UserID      int32          `json:"user_id"`
+	UserID      string         `json:"user_id"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`
 	Company     sql.NullString `json:"company"`
@@ -313,7 +313,7 @@ RETURNING realtor_id, user_id, name, email, phone_number, company, created_at
 
 type CreateRealtorParams struct {
 	Name        string         `json:"name"`
-	UserID      int32          `json:"user_id"`
+	UserID      string         `json:"user_id"`
 	Email       sql.NullString `json:"email"`
 	PhoneNumber sql.NullString `json:"phone_number"`
 	Company     sql.NullString `json:"company"`

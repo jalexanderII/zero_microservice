@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS realtors
 (
     realtor_id   SERIAL PRIMARY KEY,
-    user_id      integer      NOT NULL,
+    user_id      text         NOT NULL,
     name         varchar(255) NOT NULL,
     email        text,
     phone_number text,
@@ -14,7 +14,7 @@ CREATE INDEX realtors_name_idx ON realtors (name);
 CREATE TABLE IF NOT EXISTS owners
 (
     owner_id     SERIAL PRIMARY KEY,
-    user_id      integer      NOT NULL,
+    user_id      text         NOT NULL,
     name         varchar(255) NOT NULL,
     email        text,
     phone_number text,

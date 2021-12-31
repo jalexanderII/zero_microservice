@@ -1,6 +1,7 @@
 package database
 
 import (
+	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -38,4 +39,5 @@ type User struct {
 	Email    string             `bson:"email"`
 	Password string             `bson:"password"`
 	Role     Role               `bson:"role"`
+	MetaData userPB.Metadata    `bson:"metadata"`
 }
