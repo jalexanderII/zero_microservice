@@ -1,0 +1,23 @@
+package config
+
+const (
+	SERVERPORT            = 9090
+	FIlESERVICESERVERPORT = 9091
+	USERPORT              = 9092
+	Pass                  = "<PASSWORD>"
+	Performance           = 100
+	DBNAME                = "postgres"
+	ApplicationDBNAME     = "<NAME>"
+	TESTDBNAME            = "<NAME>"
+	MONGOURI              = "<MONGOURI>"
+	CONTENTDBNAME         = "<NAME>"
+	PLACESKEY             = "<KEY>"
+	DefaultTimeout        = time.Second * 8
+	TokenDuration         = 15 * time.Minute
+	USERDBNAME            = "<NAME>"
+	USERCOLLECTIONNAME    = "<NAME>"
+	EmailRegex            = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+	WEBPROXYPORT          = ":8080"
+	DOWNLOADPATH          = "<PATH>"
+	JWTSecret             = "<KEY>"
+)

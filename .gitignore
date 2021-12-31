@@ -19,6 +19,8 @@ gen/
 
 # env vars and constants
 const.go
+/config/const.go
+
 Makefile
 
 # IDE

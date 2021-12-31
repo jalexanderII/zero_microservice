@@ -6,9 +6,9 @@ import (
 	"net"
 
 	"github.com/hashicorp/go-hclog"
-	config "github.com/jalexanderII/zero_microservice"
 	fileServiceDB "github.com/jalexanderII/zero_microservice/backend/services/file_service/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/file_service/server"
+	"github.com/jalexanderII/zero_microservice/config"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

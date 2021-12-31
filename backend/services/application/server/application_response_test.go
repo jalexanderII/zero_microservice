@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	config "github.com/jalexanderII/zero_microservice"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/application/database/genDB"
+	"github.com/jalexanderII/zero_microservice/config"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 )
 

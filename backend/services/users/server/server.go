@@ -8,9 +8,9 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/go-hclog"
-	config "github.com/jalexanderII/zero_microservice"
 	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
+	"github.com/jalexanderII/zero_microservice/config"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

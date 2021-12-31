@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	config "github.com/jalexanderII/zero_microservice"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/external_apis"
+	"github.com/jalexanderII/zero_microservice/config"
 )
 
 type ResponseParser struct {

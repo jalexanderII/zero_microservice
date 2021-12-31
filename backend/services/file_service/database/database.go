@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	config "github.com/jalexanderII/zero_microservice"
+	"github.com/jalexanderII/zero_microservice/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

@@ -8,12 +8,12 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/listings/server"
 	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
 	authServer "github.com/jalexanderII/zero_microservice/backend/services/users/server"
+	"github.com/jalexanderII/zero_microservice/config"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	"github.com/jalexanderII/zero_microservice/gen/listings"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"

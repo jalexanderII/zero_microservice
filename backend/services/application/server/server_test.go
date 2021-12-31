@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	config "github.com/jalexanderII/zero_microservice"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
+	"github.com/jalexanderII/zero_microservice/config"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	"google.golang.org/grpc"

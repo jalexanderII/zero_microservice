@@ -5,10 +5,10 @@ import (
 	"net"
 
 	"github.com/hashicorp/go-hclog"
-	config "github.com/jalexanderII/zero_microservice"
 	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
 	"github.com/jalexanderII/zero_microservice/backend/services/users/server"
+	"github.com/jalexanderII/zero_microservice/config"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

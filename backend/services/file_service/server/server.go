@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/go-hclog"
-	config "github.com/jalexanderII/zero_microservice"
+	"github.com/jalexanderII/zero_microservice/config"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

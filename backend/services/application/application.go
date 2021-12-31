@@ -6,12 +6,12 @@ import (
 	"net"
 
 	"github.com/hashicorp/go-hclog"
-	config "github.com/jalexanderII/zero_microservice"
 	applicationDB "github.com/jalexanderII/zero_microservice/backend/services/application/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/application/server"
 	userDB "github.com/jalexanderII/zero_microservice/backend/services/users/database"
 	"github.com/jalexanderII/zero_microservice/backend/services/users/middleware"
 	authServer "github.com/jalexanderII/zero_microservice/backend/services/users/server"
+	"github.com/jalexanderII/zero_microservice/config"
 	applicationPB "github.com/jalexanderII/zero_microservice/gen/application"
 	fileServicePB "github.com/jalexanderII/zero_microservice/gen/file_service"
 	userPB "github.com/jalexanderII/zero_microservice/gen/users"

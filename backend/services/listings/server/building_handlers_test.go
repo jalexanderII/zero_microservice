@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	config "github.com/jalexanderII/zero_microservice"
 	listingsDB "github.com/jalexanderII/zero_microservice/backend/services/listings/database"
+	"github.com/jalexanderII/zero_microservice/config"
 	listingsPB "github.com/jalexanderII/zero_microservice/gen/listings"
 )
 
