@@ -31,27 +31,3 @@ gen_file_service:
 
 clear_file_service:
 	rm gen/file_service/*.go
-
-migration_listings:
-	@read -p "Enter migration name: " name; migrate create -ext sql -dir backend/services/listings/database/migrations $$name
-
-migrate_listings:
-	migrate -source=file://backend/services/listings/database/migrations -database postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName?sslmode=disable
-
-rollback_listings:
-	migrate -source=file://backend/services/listings/database/migrations -database postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName?sslmode=disable down
-
-drop_listings:
-	migrate -source=file://backend/services/listings/database/migrations -database postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName?sslmode=disable drop
-
-migration_application:
-	@read -p "Enter migration name: " name; migrate create -ext sql -dir backend/services/application/database/migrations $$name
-
-migrate_application:
-	migrate -source=file://backend/services/application/database/migrations -database postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName?sslmode=disable up
-
-rollback_application:
-	migrate -source=file://backend/services/application/database/migrations -database postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName?sslmode=disable down
-
-drop_application:
-	migrate -source=file://backend/services/application/database/migrations -database postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName?sslmode=disable drop
