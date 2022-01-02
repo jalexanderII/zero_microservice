@@ -39,5 +39,13 @@ type User struct {
 	Email    string             `bson:"email"`
 	Password string             `bson:"password"`
 	Role     Role               `bson:"role"`
+}
+
+type InternalUser struct {
+	ID       primitive.ObjectID `bson:"_id"`
+	Username string             `bson:"username"`
+	Email    string             `bson:"email"`
+	Password string             `bson:"password"`
+	Role     Role               `bson:"role"`
 	MetaData userPB.Metadata    `bson:"metadata"`
 }
