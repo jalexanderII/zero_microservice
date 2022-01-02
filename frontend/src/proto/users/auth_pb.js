@@ -15,6 +15,10 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
+var users_pb = require('./users_pb.js');
+goog.object.extend(proto, users_pb);
+var usertypes_pb = require('./usertypes_pb.js');
+goog.object.extend(proto, usertypes_pb);
 goog.exportSymbol('proto.auth.AuthResponse', null, global);
 goog.exportSymbol('proto.auth.LoginRequest', null, global);
 goog.exportSymbol('proto.auth.SignupRequest', null, global);
@@ -406,7 +410,8 @@ proto.auth.SignupRequest.toObject = function(includeInstance, msg) {
     username: jspb.Message.getFieldWithDefault(msg, 1, ""),
     email: jspb.Message.getFieldWithDefault(msg, 2, ""),
     password: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    role: jspb.Message.getFieldWithDefault(msg, 4, 0)
+    role: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    metadata: (f = msg.getMetadata()) && usertypes_pb.Metadata.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -458,6 +463,11 @@ proto.auth.SignupRequest.deserializeBinaryFromReader = function(msg, reader) {
     case 4:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setRole(value);
+      break;
+    case 5:
+      var value = new usertypes_pb.Metadata;
+      reader.readMessage(value,usertypes_pb.Metadata.deserializeBinaryFromReader);
+      msg.setMetadata(value);
       break;
     default:
       reader.skipField();
@@ -514,6 +524,14 @@ proto.auth.SignupRequest.serializeBinaryToWriter = function(message, writer) {
     writer.writeInt32(
       4,
       f
+    );
+  }
+  f = message.getMetadata();
+  if (f != null) {
+    writer.writeMessage(
+      5,
+      f,
+      usertypes_pb.Metadata.serializeBinaryToWriter
     );
   }
 };
@@ -588,6 +606,43 @@ proto.auth.SignupRequest.prototype.getRole = function() {
  */
 proto.auth.SignupRequest.prototype.setRole = function(value) {
   return jspb.Message.setProto3IntField(this, 4, value);
+};
+
+
+/**
+ * optional Metadata metadata = 5;
+ * @return {?proto.auth.Metadata}
+ */
+proto.auth.SignupRequest.prototype.getMetadata = function() {
+  return /** @type{?proto.auth.Metadata} */ (
+    jspb.Message.getWrapperField(this, usertypes_pb.Metadata, 5));
+};
+
+
+/**
+ * @param {?proto.auth.Metadata|undefined} value
+ * @return {!proto.auth.SignupRequest} returns this
+*/
+proto.auth.SignupRequest.prototype.setMetadata = function(value) {
+  return jspb.Message.setWrapperField(this, 5, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.auth.SignupRequest} returns this
+ */
+proto.auth.SignupRequest.prototype.clearMetadata = function() {
+  return this.setMetadata(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.auth.SignupRequest.prototype.hasMetadata = function() {
+  return jspb.Message.getField(this, 5) != null;
 };
 
 

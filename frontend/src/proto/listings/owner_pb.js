@@ -232,7 +232,7 @@ proto.listings.Owner.toObject = function(includeInstance, msg) {
     email: jspb.Message.getFieldWithDefault(msg, 3, ""),
     phoneNumber: jspb.Message.getFieldWithDefault(msg, 4, ""),
     company: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    userRef: jspb.Message.getFieldWithDefault(msg, 6, 0)
+    userRef: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
   if (includeInstance) {
@@ -290,7 +290,7 @@ proto.listings.Owner.deserializeBinaryFromReader = function(msg, reader) {
       msg.setCompany(value);
       break;
     case 6:
-      var value = /** @type {number} */ (reader.readInt32());
+      var value = /** @type {string} */ (reader.readString());
       msg.setUserRef(value);
       break;
     default:
@@ -358,8 +358,8 @@ proto.listings.Owner.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getUserRef();
-  if (f !== 0) {
-    writer.writeInt32(
+  if (f.length > 0) {
+    writer.writeString(
       6,
       f
     );
@@ -458,20 +458,20 @@ proto.listings.Owner.prototype.setCompany = function(value) {
 
 
 /**
- * optional int32 user_ref = 6;
- * @return {number}
+ * optional string user_ref = 6;
+ * @return {string}
  */
 proto.listings.Owner.prototype.getUserRef = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
 /**
- * @param {number} value
+ * @param {string} value
  * @return {!proto.listings.Owner} returns this
  */
 proto.listings.Owner.prototype.setUserRef = function(value) {
-  return jspb.Message.setProto3IntField(this, 6, value);
+  return jspb.Message.setProto3StringField(this, 6, value);
 };
 
 

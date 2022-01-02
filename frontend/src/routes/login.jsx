@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Styles, getAuthServiceClient } from "../clients";
+import { getAuthServiceClient } from "../clients";
+import { Styles } from "../styledComponent";
 import { LoginRequest } from '../proto/users/auth_pb'
 
 let authServiceClient = getAuthServiceClient();

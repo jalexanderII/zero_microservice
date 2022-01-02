@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CreateRealtorRequest, Realtor } from '../proto/listings/realtor_pb'
-import { Styles, getListingsClient } from "../clients";
+import { getListingsClient } from "../clients";
+import { Styles } from "../styledComponent";
 
 const srv = getListingsClient()
 
