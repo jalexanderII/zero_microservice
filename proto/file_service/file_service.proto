@@ -6,6 +6,7 @@ option go_package = "./proto;file_service";
 service FileService {
   rpc Upload(FileUploadRequest) returns (FileUploadResponse);
   rpc Download(FileDownloadRequest) returns (FileDownloadResponse);
+  rpc GetByIDAndSource(GetByIDAndSourceRequest) returns (GetByIDAndSourceResponse);
 }
 
 enum STATUS {
@@ -49,3 +50,11 @@ message FileDownloadResponse {
   string File_size = 2;
 }
 
+message GetByIDAndSourceRequest {
+  int32 Source_id = 1;
+  string Content_source = 2;
+}
+
+message GetByIDAndSourceResponse {
+  repeated FileDownloadResponse downloads = 1;
+}

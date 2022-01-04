@@ -55,3 +55,23 @@ func Test_fileServiceServer_Download(t *testing.T) {
 		t.Errorf("2: Failed to download content from DB: %+v", download)
 	}
 }
+
+func Test_fileServiceServer_GetByIDAndSource(t *testing.T) {
+	ctx, cancel := config.NewDBContext(5 * time.Second)
+	defer cancel()
+
+	db := fileServiceDB.InitiateMongoClient()
+	server := fileServiceServer{DB: db, l: L}
+	in := &fileServicePB.GetByIDAndSourceRequest{
+		SourceId:      1,
+		ContentSource: "APARTMENT",
+	}
+
+	downloads, err := server.GetByIDAndSource(ctx, in)
+	if err != nil {
+		t.Errorf("1: An error was returned: %v", err)
+	}
+	if len(downloads.GetDownloads()) != 4 {
+		t.Errorf("2: Failed to download correct content from DB: %+v", downloads.GetDownloads())
+	}
+}

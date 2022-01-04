@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"path"
 	"strconv"
@@ -88,6 +89,44 @@ func (s fileServiceServer) Download(ctx context.Context, in *fileServicePB.FileD
 		return nil, err
 	}
 	return &fileServicePB.FileDownloadResponse{Metadata: md, FileSize: strconv.FormatInt(dStream, 10)}, nil
+}
+
+func (s fileServiceServer) GetByIDAndSource(ctx context.Context, in *fileServicePB.GetByIDAndSourceRequest) (*fileServicePB.GetByIDAndSourceResponse, error) {
+	s.l.Debug("GetByIDAndSource")
+	// fsFiles := s.DB.Collection("fs.files")
+	bucket, _ := gridfs.NewBucket(&s.DB)
+
+	filter := bson.M{"$and": []bson.M{{"metadata.sourceid": in.GetSourceId()}, {"metadata.contentsource": in.GetContentSource()}}}
+	cursor, err := bucket.Find(filter)
+	if err != nil {
+		s.l.Error("[Error] saving downloaded file to local storage", "error", err)
+		return nil, err
+	}
+	defer func() {
+		if err := cursor.Close(ctx); err != nil {
+			s.l.Error("[Error] closing cursor failed", "error", err)
+		}
+	}()
+
+	type gridfsFile struct {
+		Name string `bson:"filename"`
+	}
+	var foundFiles []gridfsFile
+	if err = cursor.All(ctx, &foundFiles); err != nil {
+		s.l.Error("[Error] marshalling downloaded files", "error", err)
+		return nil, err
+	}
+	res := make([]*fileServicePB.FileDownloadResponse, len(foundFiles))
+	for idx, file := range foundFiles {
+		fmt.Printf("filename: %s\n", file.Name)
+		download, err := s.Download(ctx, &fileServicePB.FileDownloadRequest{FileName: file.Name})
+		if err != nil {
+			s.l.Error("[Error] downloading file", "filename", file.Name, "error", err)
+			return nil, err
+		}
+		res[idx] = download
+	}
+	return &fileServicePB.GetByIDAndSourceResponse{Downloads: res}, nil
 }
 
 func MongoMetaDataToPB(results bson.M) *fileServicePB.MetaData {
